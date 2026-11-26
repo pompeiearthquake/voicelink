@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VoiceLink</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12305e">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+<meta name="referrer" content="same-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   VoiceLink — design system
+   Type    Newsreader (headings, section names, titles) + Public Sans (everything you read or click)
+   Scale   12 · 13 · 15 · 16 · 18 · 22 · 28 · 36
+   Colour  deep navy, warm ivory, warm greys, muted gold (a marker only: pinned, active, "you are here")
+   Shape   square-ish (3px). Hierarchy comes from rules, spacing and type, not from boxes.
+   ========================================================================= */
+:root {
+  --paper: #faf7f0; --paper-2: #f2eee3; --surface: #fffdf8;
+  --ink: #16213a; --ink-2: #4d586c; --ink-3: #7d8697;
+  --line: #ddd7c8; --line-2: #c4bca8;
+  --primary: #12305e; --primary-hover: #0b2145; --on-primary: #faf7f0; --link: #1f4a8a;
+  --gold: #b08a35; --gold-soft: #f1e7c8; --on-gold: #2a2008;
+  --err: #a9302a;
+  --f-head: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --f-ui: 'Public Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --r: 4px; --pad: clamp(14px, 2.4vw, 32px); --topbar-h: 56px; --rail-w: 208px; --notice-w: 280px; --wrap: 1200px; --gold-bright: #d4b25f;
+  --shadow-1: 0 1px 1px rgba(22, 33, 58, 0.04), 0 2px 6px rgba(22, 33, 58, 0.05), 0 10px 22px -10px rgba(22, 33, 58, 0.10);
+  /* aliases used by a few inline styles in the script */
+  --accent: var(--link); --text: var(--ink); --muted: var(--ink-2); --border: var(--line);
+}
+body.dark {
+  --paper: #0c1630; --paper-2: #111d3b; --surface: #101c38;
+  --ink: #ece8dc; --ink-2: #b4b9c6; --ink-3: #8a91a3;
+  --line: #27355a; --line-2: #3a4a75;
+  --primary: #d4b25f; --primary-hover: #e3c577; --on-primary: #0c1630; --link: #9bb8ef;
+  --gold: #d4b25f; --gold-soft: #2d2a1a; --on-gold: #0c1630; --err: #f08c82;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.55 var(--f-ui); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; border-radius: var(--r); }
+button { cursor: pointer; }
+a { color: var(--link); }
+[hidden] { display: none !important; }
+::selection { background: var(--gold); color: var(--on-gold); }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+h1, h2, h3, h4, p { margin-top: 0; }
+
+/* ---------- small parts ---------- */
+.link-btn, .terms-link, .bottom-links button, .modal-switch a { padding: 2px 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.link-btn:hover, .terms-link:hover, .modal-switch a:hover { color: var(--ink); }
+.field-label, .sp-section label { display: block; margin: 14px 0 5px; font: 600 12px/1.2 var(--f-ui); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
+input[type="text"], input[type="password"], select, textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line-2); background: var(--surface); font-size: 15px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--link); outline-offset: 0; border-color: var(--link); }
+input:disabled { background: var(--paper-2); color: var(--ink-2); }
+textarea { min-height: 92px; resize: vertical; line-height: 1.5; }
+.error-text, .modal-error { display: none; margin-top: 8px; color: var(--err); font-size: 13px; }
+
+.submit-btn, .confirm-btn, .comment-input-row button, .logged-out-actions .primary, .sp-guest-actions .primary, .vl-empty__btn {
+  padding: 9px 18px; border: 1px solid var(--primary); background: var(--primary); color: var(--on-primary); font: 600 13px/1.2 var(--f-ui); transition: background 0.15s;
+}
+.submit-btn:hover:not(:disabled), .confirm-btn:hover:not(:disabled), .comment-input-row button:hover, .logged-out-actions .primary:hover, .sp-guest-actions .primary:hover, .vl-empty__btn:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.submit-btn:active:not(:disabled), .confirm-btn:active:not(:disabled) { transform: translateY(1px); }
+.submit-btn:disabled, .confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.cancel-btn, .logged-out-actions button:not(.primary), .sp-guest-actions button:not(.primary), .pin-btn { padding: 8px 14px; border: 1px solid var(--line-2); background: transparent; color: var(--ink); font: 500 13px/1.2 var(--f-ui); transition: background 0.15s, border-color 0.15s; }
+.cancel-btn:hover, .logged-out-actions button:not(.primary):hover, .sp-guest-actions button:not(.primary):hover, .pin-btn:hover { border-color: var(--ink); background: var(--paper-2); }
+.pin-btn { padding: 4px 9px; font-size: 12px; }
+.pin-btn.is-on { border-color: var(--gold); background: var(--gold-soft); }
+.pin-btn.danger { margin-left: auto; border-color: var(--err); color: var(--err); }
+.pin-btn.danger:hover { background: var(--err); color: var(--paper); }
+select.pin-btn { appearance: auto; width: auto; max-width: 150px; }
+
+/* ---------- top bar: full width, sticky ---------- */
+.topbar { position: sticky; top: 0; z-index: 30; height: var(--topbar-h); background: var(--paper); border-bottom: 1px solid var(--line); }
+.topbar__in { position: relative; display: flex; align-items: center; gap: 10px; max-width: var(--wrap); height: 100%; margin: 0 auto; padding: 0 24px; }
+.brand { margin: 0 auto 0 0; font: 600 26px/1 var(--f-head); letter-spacing: -0.02em; white-space: nowrap; color: var(--ink); }
+.brand em { font-style: italic; font-weight: 400; color: var(--link); }
+.brand__stop { display: inline-block; width: 0.16em; height: 0.16em; margin-left: 0.07em; background: var(--gold); }
+.account-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 14px; margin-right: 6px; font-size: 13px; color: var(--ink-2); }
+.account-bar .name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-weight: 600; }
+.header-tools { display: flex; gap: 6px; }
+.theme-toggle { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--line); background: none; color: var(--ink-2); transition: border-color 0.15s, color 0.15s, background 0.15s; }
+.theme-toggle:hover { border-color: var(--ink); color: var(--ink); background: var(--paper-2); }
+.theme-toggle svg { width: 18px; height: 18px; }
+.theme-toggle .icon-moon, .theme-toggle .icon-sound-off, .menu-toggle { display: none; }
+body.dark .theme-toggle .icon-sun { display: none; }
+body.dark .theme-toggle .icon-moon { display: block; }
+.theme-toggle.muted .icon-sound-on { display: none; }
+.theme-toggle.muted .icon-sound-off { display: block; }
+.theme-toggle.muted { color: var(--ink-3); }
+
+/* ---------- page grid: rail | wall | notice, inside one centred container ---------- */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "wall" "notice"; column-gap: 28px; max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+.wall { grid-area: wall; width: 100%; max-width: 760px; margin: 0 auto; min-width: 0; padding-top: 24px; }
+.notice { grid-area: notice; width: 100%; max-width: 760px; margin: 28px auto 0; }
+.rail { grid-area: rail; display: flex; flex-direction: column; gap: 14px; }
+
+.wall-head { margin-bottom: 2px; }
+.wall-head__title { margin: 0; font: 600 clamp(26px, 3vw, 30px)/1.15 var(--f-head); letter-spacing: -0.015em; }
+.wall-head__sub { margin: 4px 0 0; font-size: 14px; line-height: 1.4; color: var(--ink-2); }
+.status-line { margin: 2px 0 14px; font-size: 12px; color: var(--ink-3); }
+
+/* staff: section switcher (segmented, scrolls on small screens) */
+.sections { display: flex; gap: 6px; margin: 0 0 16px; padding-bottom: 4px; overflow-x: auto; scrollbar-width: thin; }
+.section-btn { flex: none; padding: 7px 12px; border: 1px solid var(--line-2); background: transparent; color: var(--ink-2); font: 500 13px/1.2 var(--f-ui); }
+.section-btn:hover { border-color: var(--ink); color: var(--ink); }
+.section-btn.active { border-color: var(--primary); background: var(--primary); color: var(--on-primary); }
+
+/* composer: compact, name and section side by side for staff */
+.form-box:not(:empty) { display: grid; grid-template-columns: minmax(0, 1fr); margin: 0 0 4px; padding: 12px 16px 14px; border: 1px solid var(--line-2); background: var(--surface); }
+.form-box:has(.grade-section-row) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); column-gap: 14px; }
+.form-box > * { grid-column: 1 / -1; }
+.form-box:has(.grade-section-row) > label:nth-of-type(1), .form-box:has(.grade-section-row) > .name-fields { grid-column: 1; }
+.form-box:has(.grade-section-row) > label:nth-of-type(2), .form-box:has(.grade-section-row) > .grade-section-row { grid-column: 2; }
+.form-box:has(.grade-section-row) > label:nth-of-type(1), .form-box:has(.grade-section-row) > label:nth-of-type(2) { grid-row: 2; }
+.form-box:has(.grade-section-row) > .name-fields, .form-box:has(.grade-section-row) > .grade-section-row { grid-row: 3; }
+.composer__title { margin: 0; font: 600 19px/1.2 var(--f-head); }
+.form-box .field-label { margin: 10px 0 4px; }
+.name-fields { display: flex; align-items: center; gap: 12px; }
+.name-fields > div:first-child { flex: 1; }
+.tag-display { white-space: nowrap; }
+.tag-display:empty { display: none; }
+.grade-section-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-box textarea { min-height: 76px; margin-top: 10px; }
+.checkbox-row { display: flex; align-items: center; gap: 10px; margin: 10px 0 2px; font-size: 14px; }
+.checkbox-row input, .terms-row input { width: 17px; height: 17px; margin: 0; accent-color: var(--primary); }
+.checkbox-row label { margin: 0; font: inherit; letter-spacing: 0; text-transform: none; color: var(--ink); }
+.form-box .submit-btn { justify-self: start; margin-top: 10px; }
+.logged-out-box p { margin: 0 0 12px; font: 400 18px/1.4 var(--f-head); }
+.logged-out-actions { display: flex; gap: 10px; }
+
+/* tabs: one segmented bar, sticky under the top bar; gold marks the active tab */
+.tabs { position: sticky; top: var(--topbar-h); z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); margin: 16px 0 6px; border: 1px solid var(--line-2); border-radius: var(--r); background: var(--paper-2); overflow: hidden; }
+.tab-btn { padding: 12px 8px 10px; border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; font: 600 11.5px/1 var(--f-ui); letter-spacing: 0.1em; text-align: center; text-transform: uppercase; color: var(--ink-3); transition: color 0.15s, background 0.15s; }
+.tab-btn + .tab-btn { border-left: 1px solid var(--line); }
+.tab-btn:hover { color: var(--ink); background: var(--surface); }
+.tab-btn.active { background: var(--surface); color: var(--ink); border-bottom-color: var(--gold); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ---------- posts: avatar + meta, text, action bar. Separated by hairlines, not boxed. ---------- */
+.card { padding: 14px 0 12px; border-top: 1px solid var(--line); }
+.tab-content > .card:first-child { border-top: 0; }
+.card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13px; color: var(--ink-2); }
+.card-flags { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.avatar { display: inline-grid; place-items: center; flex: none; width: 26px; height: 26px; border: 1px solid var(--line-2); border-radius: 3px; background: var(--paper-2); color: var(--ink-2); font: 700 12px/1 var(--f-ui); }
+.avatar--official { border-color: var(--primary); background: var(--primary); color: var(--on-primary); }
+.avatar--anon { border-style: dashed; background: transparent; font-style: italic; }
+.avatar--lg { width: 38px; height: 38px; font-size: 16px; }
+.card-name { color: var(--ink); font-weight: 600; }
+.anon-name { font-style: italic; font-weight: 600; color: var(--ink-2); }
+.reveal { margin-left: 6px; padding: 1px 7px; border-left: 3px solid var(--gold); background: var(--gold-soft); color: var(--ink); font-size: 12px; font-style: normal; font-weight: 500; }
+.meta-date { color: var(--ink-3); }
+.meta-date::before { content: '\00b7'; margin-right: 8px; color: var(--ink-3); }
+.grade-tag { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: var(--ink-2); }
+.tag-dot { width: 6px; height: 6px; border-radius: 0; background: var(--gold); }
+.pinned-flag { padding: 1px 7px; border-radius: 2px; background: var(--gold); color: var(--on-gold); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.card--pinned { padding-left: 14px; border-top: 0; border-left: 3px solid var(--gold); background: var(--gold-soft); background: color-mix(in srgb, var(--gold-soft) 55%, transparent); }
+.card-text { margin: 10px 0 12px; max-width: 70ch; font-size: 16px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+.card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 34px; height: 32px; padding: 0 10px; border: 1px solid var(--line-2); border-radius: var(--r); background: transparent; font: 600 13px/1 var(--f-ui); color: var(--ink-2); transition: border-color 0.15s, background 0.15s, color 0.15s; }
+.action-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.action-btn:hover:not(:disabled) { border-color: var(--ink); background: var(--paper-2); color: var(--ink); }
+.action-btn.is-active { border-color: var(--gold); background: var(--gold-soft); color: var(--ink); }
+.action-btn.is-active svg { fill: var(--gold); stroke: var(--ink); }
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.card-mod { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: auto; }
+.card-mod .pin-btn, .card-mod select.pin-btn { height: 32px; }
+
+.comments-box { display: none; margin-top: 10px; padding-left: 14px; border-left: 2px solid var(--line-2); }
+.comments-box.open { display: block; }
+.comment { margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+.c-name { margin-right: 6px; font-weight: 600; }
+.comment-del { float: right; border: 0; background: none; color: var(--ink-3); font-size: 18px; line-height: 1; }
+.comment-del:hover { color: var(--err); }
+.comment-input-row { display: flex; gap: 8px; margin-top: 8px; }
+.comment-input-row input { flex: 1; }
+.comments-locked { padding: 6px 0; font-size: 13px; color: var(--ink-2); }
+
+/* status + privacy stamps: rectangular and outlined */
+.vl-badge, .privacy-badge { display: inline-block; padding: 1px 7px; border: 1px solid currentColor; border-radius: 2px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.vl-badge--pending  { background: #f6ecc9; color: #6b4e00; }
+.vl-badge--resolved { background: #dcebdc; color: #1f5a31; }
+.vl-badge--planned  { background: #e3eaf6; color: #1f4a8a; }
+.vl-badge--archived { background: #e8e6df; color: #4d586c; }
+body.dark .vl-badge--pending  { background: #3a3110; color: #ecd07c; }
+body.dark .vl-badge--resolved { background: #14301f; color: #86d2a0; }
+body.dark .vl-badge--planned  { background: #182a52; color: #9bb8ef; }
+body.dark .vl-badge--archived { background: #232b44; color: #aab2c4; }
+.privacy-badge.is-anon { border-color: var(--gold); background: var(--gold-soft); color: var(--ink); }
+.privacy-badge.is-public { color: var(--link); }
+
+.vl-empty { padding: 28px 0 36px; border-top: 1px solid var(--line); }
+.vl-empty__icon { display: none; }
+.vl-empty__title { margin: 0 0 6px; font: 600 24px/1.15 var(--f-head); letter-spacing: -0.01em; }
+.vl-empty__text { max-width: 44ch; margin: 0; color: var(--ink-2); }
+.vl-empty__btn { margin-top: 14px; }
+.empty-msg { padding: 18px 0; color: var(--ink-2); font-size: 14px; }
+.manager-panel { margin: 0 0 8px; padding: 10px 0; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line); font-size: 13px; color: var(--ink-2); }
+.manager-panel h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 3px; font: 600 12px/1 var(--f-ui); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink); }
+.manager-panel h3::before { content: ''; width: 6px; height: 6px; background: var(--gold); }
+
+/* archive */
+.archive-view { display: none; }
+body.view-archive .archive-view { display: block; }
+body.view-archive .tabs, body.view-archive .form-box, body.view-archive .tab-content, body.view-archive .sections { display: none !important; }
+.archive-head h2 { margin: 4px 0 6px; font: 600 28px/1.1 var(--f-head); letter-spacing: -0.015em; }
+.archive-head p { max-width: 60ch; margin: 0 0 14px; color: var(--ink-2); font-size: 14px; }
+.archive-name { color: var(--ink); font-weight: 600; }
+.handle { color: var(--ink-3); }
+.archive-dates { margin-top: 4px; font-size: 12px; color: var(--ink-3); }
+.archive-stats { display: inline-flex; gap: 14px; font-size: 13px; color: var(--ink-2); }
+.archive-stats svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; vertical-align: -2px; }
+
+/* ---------- rail: the left navigation column ---------- */
+.sp-head { display: flex; align-items: center; justify-content: space-between; }
+.sp-title { margin: 0; font: 700 11px/1 var(--f-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.sp-close { width: 40px; height: 40px; border: 0; background: none; font-size: 26px; line-height: 1; color: var(--ink-2); }
+.sp-user { display: flex; align-items: center; gap: 10px; padding: 4px 0 14px; border-bottom: 1px solid var(--line); font-size: 13px; line-height: 1.3; color: var(--ink-2); }
+.sp-user .sp-name { display: block; font: 600 18px/1.2 var(--f-head); color: var(--ink); overflow-wrap: anywhere; }
+.sp-guest { padding: 12px; border: 1px solid var(--line); background: var(--surface); }
+.sp-guest p { margin: 0 0 10px; font-size: 14px; color: var(--ink-2); }
+.sp-guest-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.sp-nav { display: flex; flex-direction: column; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.sp-link { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; height: 40px; padding: 0 12px; border: 0; border-radius: var(--r); background: none; text-align: left; font: 500 14px/1 var(--f-ui); color: var(--ink-2); transition: background 0.15s, color 0.15s; }
+.sp-link svg { flex: none; width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.sp-link:hover { background: var(--paper-2); color: var(--ink); }
+.sp-link.active { background: var(--paper-2); color: var(--ink); font-weight: 600; }
+.sp-link.active::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; background: var(--gold); }
+.sp-section { padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.sp-details > summary { display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 12px; border-radius: var(--r); list-style: none; font: 700 11px/1 var(--f-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); cursor: pointer; }
+.sp-details > summary::-webkit-details-marker { display: none; }
+.sp-details > summary::after { content: ''; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform 0.15s; }
+.sp-details[open] > summary::after { transform: rotate(-135deg); }
+.sp-details > summary:hover { background: var(--paper-2); color: var(--ink); }
+.sp-details[open] { padding: 0 0 14px; }
+.sp-details > :not(summary) { margin-left: 12px; margin-right: 12px; }
+.sp-details label { margin-top: 12px; }
+.sp-section .submit-btn { width: calc(100% - 24px); margin-top: 12px; }
+.sp-note { margin: 6px 12px 0; font-size: 13px; line-height: 1.45; color: var(--ink-3); }
+.sp-msg { display: none; margin-top: 8px; font-size: 13px; }
+.sp-msg.error { color: var(--err); }
+.sp-msg.ok { color: var(--link); }
+.access-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.access-row small { display: block; color: var(--ink-3); font-size: 12px; }
+
+/* ---------- notice: three tidy blocks, each with a gold tick on its label ---------- */
+.notice { display: flex; flex-direction: column; gap: 12px; padding: 0; border: 0; background: none; }
+.notice__block { padding: 14px 16px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow-1); }
+.notice__h { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font: 700 11px/1 var(--f-ui); letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink); }
+.notice__h::before { content: ''; width: 14px; height: 2px; background: var(--gold); }
+.notice__block p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+.notice__block p + p { margin-top: 8px; }
+.rules { margin: 0; padding: 0; list-style: none; counter-reset: rule; }
+.rules li { counter-increment: rule; display: grid; grid-template-columns: 22px 1fr; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.rules li:last-child { border-bottom: 0; }
+.rules li::before { content: counter(rule); font-weight: 700; color: var(--gold); }
+.directory { margin: 0; }
+.directory > div { display: grid; grid-template-columns: 68px 1fr; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.directory > div:last-child { border-bottom: 0; }
+.directory dt { color: var(--ink-3); font-size: 13px; }
+.directory dd { margin: 0; color: var(--ink-2); }
+.directory .is-mine { font-weight: 700; color: var(--ink); box-shadow: inset 0 -6px 0 var(--gold-soft); }
+
+/* ---------- footer ---------- */
+.site-footer { margin-top: 48px; border-top: 1px solid var(--line); }
+.site-footer__in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; max-width: var(--wrap); margin: 0 auto; padding: 16px 24px calc(20px + env(safe-area-inset-bottom)); font-size: 13px; color: var(--ink-3); }
+.bottom-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+
+/* ---------- modals ---------- */
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 40; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; background: rgba(12, 22, 48, 0.6); }
+.modal-overlay.open { display: flex; }
+.modal { width: min(440px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; padding: 24px 24px 20px; border: 1px solid var(--ink); border-top: 4px solid var(--primary); border-radius: 0; background: var(--surface); }
+.modal h3 { margin: 0 0 4px; font: 600 26px/1.1 var(--f-head); letter-spacing: -0.015em; }
+.modal > p { margin: 0 0 4px; color: var(--ink-2); font-size: 14px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.modal-switch { margin-top: 14px; text-align: center; font-size: 14px; color: var(--ink-2); }
+.modal-hint { margin-top: 6px; font-size: 12px; color: var(--ink-3); }
+.modal-note { margin: 12px 0 0; padding: 8px 12px; border-left: 3px solid var(--gold); background: var(--gold-soft); font-size: 14px; line-height: 1.5; }
+.terms-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; font-size: 14px; line-height: 1.45; cursor: pointer; }
+.terms-row input { flex: none; margin-top: 2px; }
+.terms-read { margin: 6px 0 0 27px; font-size: 13px; color: var(--ink-2); }
+.modal-terms { width: min(640px, 100%); }
+.terms-updated { margin: 0 0 10px; font-size: 12px; color: var(--ink-3); }
+.terms-body { max-height: 54vh; overflow-y: auto; padding: 0 12px 0 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.6; }
+.terms-body h4 { margin: 16px 0 4px; font: 600 17px/1.2 var(--f-head); color: var(--ink); }
+.terms-body p, .terms-body ul { margin: 0 0 8px; color: var(--ink-2); }
+.terms-body ul { padding-left: 18px; }
+
+/* ---------- toasts ---------- */
+.vl-toast-stack { position: fixed; z-index: 60; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 8px; width: min(92vw, 380px); pointer-events: none; }
+.vl-toast { display: flex; align-items: flex-start; gap: 10px; padding: 11px 8px 11px 14px; pointer-events: auto; background: var(--ink); color: var(--paper); border-left: 5px solid var(--gold); border-radius: var(--r); font-size: 14px; line-height: 1.45; opacity: 0; transform: translateY(10px); transition: opacity 0.2s ease, transform 0.2s ease; }
+.vl-toast.is-in { opacity: 1; transform: none; }
+.vl-toast.is-out { opacity: 0; transform: translateY(6px); }
+.vl-toast--success { border-left-color: #4aa36f; }
+.vl-toast--error { border-left-color: #e0645a; }
+.vl-toast__icon { display: none; }
+.vl-toast__text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.vl-toast__close { width: 24px; height: 24px; border: 0; background: none; color: inherit; font-size: 18px; line-height: 1; opacity: 0.7; }
+.vl-toast__close:hover { opacity: 1; }
+
+/* ---------- responsive ---------- */
+.panel-backdrop { position: fixed; inset: 0; z-index: 34; background: rgba(12, 22, 48, 0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+@media (max-width: 1099px) {
+  /* rail becomes a drawer */
+  .rail { position: fixed; z-index: 35; top: 0; bottom: 0; left: 0; width: min(310px, 88vw); overflow-y: auto; padding: calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); background: var(--paper); border-right: 1px solid var(--ink); transform: translateX(-102%); transition: transform 0.22s ease; }
+  body.panel-open .rail { transform: none; }
+  body.panel-open .panel-backdrop { opacity: 1; pointer-events: auto; }
+}
+@media (min-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr) var(--notice-w); grid-template-areas: "wall notice"; }
+  .notice { position: sticky; top: calc(var(--topbar-h) + 24px); align-self: start; max-width: none; margin: 24px 0 0; }
+}
+@media (min-width: 1100px) {
+  .sp-close, .panel-backdrop { display: none; }
+  .rail { display: none; }
+  body.panel-open .rail { display: flex; position: sticky; top: var(--topbar-h); align-self: start; height: calc(100vh - var(--topbar-h)); overflow-y: auto; padding: 24px 20px 24px 0; border-right: 1px solid var(--line); }
+  body.panel-open .layout { grid-template-columns: var(--rail-w) minmax(0, 1fr); grid-template-areas: "rail wall" "rail notice"; }
+  body.panel-open .notice { position: static; max-width: none; margin: 24px 0 0; padding-left: 28px; }
+  body.panel-open .wall { max-width: none; padding-left: 28px; }
+}
+@media (min-width: 1180px) {
+  body.panel-open .layout { grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--notice-w); grid-template-areas: "rail wall notice"; }
+  body.panel-open .notice { position: sticky; top: calc(var(--topbar-h) + 24px); align-self: start; margin: 24px 0 0; padding-left: 0; }
+}
+@media (max-width: 760px) {
+  .topbar__in { padding: 0 12px; }
+  .layout { padding: 0 14px; }
+  .hero { min-height: 230px; }
+  .hero__stripe { opacity: 0.2; }
+  .hero__body { padding-right: 22px; }
+  .hero__kicker { font-size: 10px; letter-spacing: 0.14em; }
+  .menu-toggle { display: grid; }
+  .account-bar { display: none; position: absolute; z-index: 31; top: 100%; left: 12px; right: 12px; flex-direction: column; align-items: flex-start; gap: 8px; margin: 6px 0 0; padding: 12px 14px; border: 1px solid var(--ink); background: var(--surface); }
+  body.menu-open .account-bar { display: flex; }
+  .brand { font-size: 24px; }
+  .wall { padding-top: 16px; }
+  .name-fields { flex-direction: column; align-items: stretch; gap: 8px; }
+  .card-mod { width: 100%; margin-left: 0; }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal { width: 100%; max-height: 92vh; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+  .vl-toast-stack { left: 14px; right: 14px; width: auto; }
+}
+@media (pointer: coarse), (max-width: 760px) {
+  .tab-btn, .section-btn { min-height: 44px; }
+  .sp-link { height: 46px; }
+  .action-btn, .card-mod .pin-btn, .card-mod select.pin-btn { height: 40px; min-width: 40px; }
+  .pin-btn, .cancel-btn, .confirm-btn, .submit-btn { min-height: 44px; }
+  input[type="text"], input[type="password"], select, textarea { font-size: 16px; min-height: 44px; }
+  .theme-toggle { width: 42px; height: 42px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+
+/* ---------- hero ---------- */
+.hero { position: relative; overflow: hidden; min-height: clamp(220px, 22vw, 262px); margin-bottom: 24px; border: 1px solid #08142e; border-radius: var(--r); background: #0c1d40; color: #fff; box-shadow: var(--shadow-1); }
+.hero__art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero__body { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 12px; min-height: inherit; padding: 30px 38% 38px clamp(22px, 4vw, 40px); }
+.hero__kicker { margin: 0; font: 600 11px/1.3 var(--f-ui); letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-bright); }
+.hero__mark { margin: 0; font: 500 clamp(56px, 7.6vw, 86px)/1 var(--f-head); letter-spacing: -0.03em; color: #fff; }
+.hero__mark span { color: var(--gold-bright); }
+.hero__sub { max-width: 30ch; margin: 0; font: 400 clamp(15px, 1.35vw, 17px)/1.45 var(--f-ui); color: rgba(255, 255, 255, 0.88); }
+.hero__tag { position: absolute; right: 12px; bottom: 10px; padding: 4px 8px; background: #0c1d40; font: 600 10px/1 var(--f-ui); letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.68); }
+
+/* ---------- crisp controls ---------- */
+.submit-btn, .confirm-btn, .comment-input-row button, .logged-out-actions .primary, .sp-guest-actions .primary, .vl-empty__btn {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 2px rgba(11, 33, 69, 0.28), 0 6px 12px -6px rgba(11, 33, 69, 0.35);
+  transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+.submit-btn:hover:not(:disabled), .confirm-btn:hover:not(:disabled), .logged-out-actions .primary:hover, .sp-guest-actions .primary:hover { transform: translateY(-1px); }
+.submit-btn:active:not(:disabled), .confirm-btn:active:not(:disabled), .logged-out-actions .primary:active, .sp-guest-actions .primary:active { transform: translateY(0); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25); }
+.cancel-btn, .logged-out-actions button:not(.primary), .sp-guest-actions button:not(.primary) { background: var(--surface); box-shadow: 0 1px 1px rgba(22, 33, 58, 0.05); font-weight: 600; }
+.logged-out-actions button, .sp-guest-actions button { min-width: 88px; }
+.form-box:not(:empty) { border-radius: var(--r); box-shadow: var(--shadow-1); }
+.logged-out-box { padding: 6px 4px; }
+.sp-guest { border-radius: var(--r); box-shadow: var(--shadow-1); }
+.modal { box-shadow: 0 2px 4px rgba(12, 22, 48, 0.12), 0 24px 48px -12px rgba(12, 22, 48, 0.35); }
+body.dark .hero { border-color: var(--line-2); }
+</style>
+</head>
+<body>
+
+<div class="panel-backdrop" id="panel-backdrop"></div>
+
+<header class="topbar">
+  <div class="topbar__in">
+    <button class="theme-toggle" id="panel-toggle" aria-label="Open side menu" aria-expanded="false" aria-controls="sidepanel" title="Side menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9.5 4.5v15"/></svg>
+    </button>
+    <h1 class="brand">Voice<em>Link</em><span class="brand__stop" aria-hidden="true"></span></h1>
+    <div class="account-bar" id="account-bar"></div>
+    <div class="header-tools">
+      <button class="theme-toggle menu-toggle" id="menu-toggle" aria-label="Open account menu" aria-expanded="false" aria-controls="account-bar" title="Account menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+      <button class="theme-toggle" id="sound-toggle" aria-label="Toggle sound effects" aria-pressed="true" title="Sound effects">
+      <svg class="icon-sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+      <svg class="icon-sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+    </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Light / dark">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"/></svg>
+    </button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidepanel rail" id="sidepanel" aria-label="Menu" inert>
+    <div class="sp-head">
+      <span class="sp-title">Menu</span>
+      <button class="sp-close" id="panel-close" aria-label="Close side menu">&times;</button>
+    </div>
+    <div class="sp-user" id="sp-user" hidden></div>
+    <div class="sp-guest" id="sp-guest">
+      <p>Log in to read your section’s wall, comment and manage your account.</p>
+      <div class="sp-guest-actions">
+        <button class="primary" id="sp-login">Log in</button>
+        <button id="sp-signup">Sign up</button>
+      </div>
+    </div>
+    <nav class="sp-nav" aria-label="Menu">
+      <button class="sp-link active" id="nav-feed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg>Wall</button>
+      <button class="sp-link" id="nav-archive" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5h17v4h-17zM5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/></svg>Archived posts</button>
+      <button class="sp-link" id="nav-rules"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 5 6v5.5c0 4.2 2.8 7.4 7 9 4.2-1.6 7-4.8 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Rules &amp; privacy</button>
+    </nav>
+    <details class="sp-section sp-details" id="sp-access" hidden>
+      <summary>Anonymous-author access</summary>
+      <p class="sp-note">Admins can always see who wrote an anonymous post. Council members can only if you allow it here.</p>
+      <div id="access-list"></div>
+    </details>
+    <details class="sp-section sp-details" id="sp-password" hidden>
+      <summary>Change password</summary>
+      <label for="pw-current">Current password</label>
+      <input type="password" id="pw-current" autocomplete="current-password">
+      <label for="pw-new">New password</label>
+      <input type="password" id="pw-new" autocomplete="new-password" placeholder="6+ characters">
+      <label for="pw-confirm">Confirm new password</label>
+      <input type="password" id="pw-confirm" autocomplete="new-password">
+      <div class="sp-msg error" id="pw-error" role="alert"></div>
+      <div class="sp-msg ok" id="pw-ok" role="status"></div>
+      <div class="sp-note">Changing your password signs you out on every device.</div>
+      <button class="submit-btn" id="pw-save">Update password</button>
+    </details>
+  </aside>
+
+  <main class="wall" id="wall">
+    <section class="hero" aria-label="VoiceLink">
+      <svg class="hero__art" viewBox="0 0 640 260" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+        <defs><pattern id="hv-hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><line x1="0" y1="0" x2="0" y2="9" stroke="#fff" stroke-opacity=".055" stroke-width="1"/></pattern></defs>
+        <rect width="640" height="260" fill="#0c1d40"/>
+        <rect width="640" height="260" fill="url(#hv-hatch)"/>
+        <g fill="none" stroke="#a9bdea" stroke-width="1">
+          <circle cx="548" cy="132" r="46" stroke-opacity=".34"/><circle cx="548" cy="132" r="88" stroke-opacity=".24"/>
+          <circle cx="548" cy="132" r="132" stroke-opacity=".17"/><circle cx="548" cy="132" r="180" stroke-opacity=".11"/>
+          <circle cx="548" cy="132" r="232" stroke-opacity=".07"/>
+        </g>
+        <g class="hero__stripe"><path d="M566 -10 H600 L486 270 H452Z" fill="#d4b25f"/><path d="M614 -10 H620 L506 270 H500Z" fill="#d4b25f" fill-opacity=".55"/></g>
+      </svg>
+      <div class="hero__body">
+        <p class="hero__kicker">Bulacan Ecumenical School &middot; Student Council</p>
+        <p class="hero__mark" aria-hidden="true">voicelink<span>.</span></p>
+        <p class="hero__sub">A place for your section’s opinions, suggestions, and concerns.</p>
+      </div>
+      <span class="hero__tag">&#9656; &nbsp;|&nbsp; Community wall</span>
+    </section>
+
+    <div class="wall-head">
+      <h2 class="wall-head__title" id="wall-title">Student wall</h2>
+      <p class="wall-head__sub"><span id="wall-scope"></span> <span id="wall-count"></span></p>
+    </div>
+    <div class="status-line" id="status-line">loading...</div>
+
+    <nav class="sections" id="section-tabs" aria-label="Section walls" hidden></nav>
+
+    <div class="form-box" id="form-box"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="all">all posts</button>
+      <button class="tab-btn" data-tab="pinned">pinned</button>
+      <button class="tab-btn" data-tab="bookmarks">saved</button>
+    </div>
+
+    <div id="tab-all" class="tab-content active"></div>
+    <div id="tab-pinned" class="tab-content"></div>
+    <div id="tab-bookmarks" class="tab-content"></div>
+
+    <div class="archive-view" id="archive-view">
+      <div class="archive-head">
+        <h2>Archived posts</h2>
+        <p>Posts removed from the wall. The author of an anonymous post is shown only to admins, and to council members an admin has authorized. Permanently deleting a post erases it, its comments and its reactions for good.</p>
+      </div>
+      <div id="archive-list"></div>
+    </div>
+  </main>
+
+  <aside class="notice" id="about" aria-label="About VoiceLink">
+    <section class="notice__block">
+      <h2 class="notice__h">About this wall</h2>
+      <p>VoiceLink is the student council’s moderated wall for Bulacan Ecumenical School. Every grade and section has its own private space, and announcements from the council reach everyone.</p>
+    </section>
+    <section class="notice__block">
+      <h2 class="notice__h">House rules</h2>
+      <ol class="rules">
+        <li>Keep it kind. No bullying, harassment or profanity.</li>
+        <li>Posts are moderated by the council.</li>
+        <li>Anonymous posts hide your name from students. Admins can still see who wrote them; council members can only if an admin has allowed it.</li>
+      </ol>
+      <p><button type="button" class="terms-link" data-open-terms>Read the full Terms &amp; Privacy Policy</button></p>
+    </section>
+    <section class="notice__block">
+      <h2 class="notice__h">Sections</h2>
+      <dl class="directory" id="directory"></dl>
+    </section>
+  </aside>
+
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer__in">
+    <span>VoiceLink &middot; the student council wall of Bulacan Ecumenical School</span>
+    <div class="bottom-links">
+      <button id="refresh-btn">refresh</button>
+      <button id="terms-open">terms &amp; privacy</button>
+      <button id="manager-open">staff login</button>
+    </div>
+  </div>
+</footer>
+
+<!-- sign up -->
+<div class="modal-overlay" id="signup-modal">
+  <div class="modal">
+    <h3>Create account</h3>
+    <label class="field-label" for="signup-name">Name</label>
+    <input type="text" id="signup-name" placeholder="e.g. Jamie Cruz">
+    <label class="field-label">Grade &amp; section</label>
+    <div class="grade-section-row">
+      <div>
+        <select id="signup-grade">
+          <option value="">Grade</option>
+          <option value="7">Grade 7</option>
+          <option value="8">Grade 8</option>
+          <option value="9">Grade 9</option>
+          <option value="10">Grade 10</option>
+        </select>
+      </div>
+      <div>
+        <select id="signup-section" disabled>
+          <option value="">Section</option>
+        </select>
+      </div>
+    </div>
+    <label class="field-label" for="signup-pass">Password</label>
+    <input type="password" id="signup-pass" placeholder="6+ characters">
+    <label class="field-label" for="signup-pass2">Confirm password</label>
+    <input type="password" id="signup-pass2" placeholder="retype password">
+    <label class="terms-row" for="signup-terms">
+      <input type="checkbox" id="signup-terms">
+      <span>I agree to the Terms of Service and acknowledge that my profile data is stored securely.</span>
+    </label>
+    <div class="terms-read">Read the <button type="button" class="terms-link" data-open-terms>Terms &amp; Privacy Policy</button></div>
+    <div class="modal-error" id="signup-error"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="signup-cancel">Cancel</button>
+      <button class="confirm-btn" id="signup-confirm" disabled>Sign up</button>
+    </div>
+    <div class="modal-switch">Already have an account? <a id="switch-to-login">Log in</a></div>
+  </div>
+</div>
+
+<!-- log in -->
+<div class="modal-overlay" id="userlogin-modal">
+  <div class="modal">
+    <h3>Log in</h3>
+    <label class="field-label" for="userlogin-name">Name</label>
+    <input type="text" id="userlogin-name" placeholder="e.g. Jamie Cruz">
+    <label class="field-label">Grade &amp; section</label>
+    <div class="grade-section-row">
+      <div>
+        <select id="userlogin-grade">
+          <option value="">Grade</option>
+          <option value="7">Grade 7</option>
+          <option value="8">Grade 8</option>
+          <option value="9">Grade 9</option>
+          <option value="10">Grade 10</option>
+        </select>
+      </div>
+      <div>
+        <select id="userlogin-section" disabled>
+          <option value="">Section</option>
+        </select>
+      </div>
+    </div>
+    <label class="field-label" for="userlogin-pass">Password</label>
+    <input type="password" id="userlogin-pass" placeholder="password">
+    <div class="modal-error" id="userlogin-error"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="userlogin-cancel">Cancel</button>
+      <button class="confirm-btn" id="userlogin-confirm">Log in</button>
+    </div>
+    <div class="modal-switch">No account yet? <a id="switch-to-signup">Sign up</a></div>
+  </div>
+</div>
+
+<!-- manager -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <h3>Staff login</h3>
+    <label class="field-label" for="manager-username">Username</label>
+    <input type="text" id="manager-username" placeholder="username">
+    <label class="field-label" for="manager-pass">Password</label>
+    <input type="password" id="manager-pass" placeholder="password">
+    <div id="manager-setup-fields" style="display:none;">
+      <label class="field-label" for="manager-setup-name">Display name</label>
+      <input type="text" id="manager-setup-name" placeholder="e.g. Ms. Santos">
+      <label class="field-label" for="manager-setup-key">Setup key</label>
+      <input type="password" id="manager-setup-key" placeholder="from the server's .env file">
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="login-cancel">Cancel</button>
+      <button class="confirm-btn" id="login-confirm">Log in</button>
+    </div>
+    <div class="modal-switch"><a id="manager-setup-toggle">First admin? Set up account</a></div>
+  </div>
+</div>
+
+<!-- terms of service & privacy policy -->
+<div class="modal-overlay" id="terms-modal" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+  <div class="modal modal-terms">
+    <h3 id="terms-title">Terms of Service &amp; Privacy Policy</h3>
+    <p class="terms-updated">VoiceLink &middot; Student Council &middot; Last updated November 2026</p>
+    <div class="terms-body" tabindex="0">
+      <h4>1. What VoiceLink is</h4>
+      <p>VoiceLink is a moderated wall where students share opinions, suggestions and concerns with the student council. Each grade and section has its own wall. By creating an account or using VoiceLink, you agree to these terms.</p>
+
+      <h4>2. Data collection</h4>
+      <p>We keep only what's needed to run your account:</p>
+      <ul>
+        <li>Your display name, grade and section, and a username if you choose to set one.</li>
+        <li>Your password, saved only as a one-way hash (see Security standards). The password itself is never stored.</li>
+        <li>A private record of each time an admin, or a council member an admin has authorized, looks up who wrote an anonymous post (who looked, which post, and when).</li>
+      </ul>
+      <p>Plus what you create while using the wall: your posts, comments, stars and saved posts, with the times they were made. Posts that are archived stay stored, with your real name, until an admin or council member permanently deletes them. A login cookie keeps you signed in for up to 7 days. We don't collect your email, phone number, birthday or location, and there is no advertising or tracking.</p>
+      <p>One thing to know: this page loads its fonts from Google Fonts, so your browser contacts Google to download them.</p>
+
+      <h4>3. Security standards</h4>
+      <ul>
+        <li>Passwords are hashed with bcrypt, a one-way method. Hashes can't be turned back into passwords, so nobody, including admins, can read yours. Forgotten passwords can't be looked up.</li>
+        <li>Account data is kept in a private database on a persistent storage volume attached to the server. It is not publicly downloadable.</li>
+        <li>You stay signed in with a secure, HTTP-only cookie. Login, sign-up and profile changes are rate-limited to block guessing attacks.</li>
+        <li>Names, posts and comments are shown as plain text, never as code, and the server checks which section each post belongs to before showing it to you.</li>
+      </ul>
+      <p>No online system can promise to be perfectly secure, so please pick a strong password that you don't use anywhere else.</p>
+
+      <h4>4. Who sees your data and how it's used</h4>
+      <p>Your posts and comments are visible to logged-in students in your grade and section, and to admins and council members, who can switch between every section’s wall. Posts written by admins or council members, and the pinned post, are visible to every logged-in student, but comments on them stay limited to the section they were posted for.</p>
+      <p><strong>Anonymous posts.</strong> When you post anonymously, other students see “Anonymous” instead of your name. It does not hide you from the school’s administrators: admins (advisers) can always see the real name behind an anonymous post, so they can deal with abuse. Student council members can only see it if an admin has explicitly authorized them, and every lookup is recorded. The archive, which only admins and council members can open, shows the real author of an anonymous post to those same people only.</p>
+      <p>Your data is used only to run VoiceLink: logging you in, showing your section's wall and moderating it. It is for internal student council use. It is not sold, not used for advertising and not shared with outside parties.</p>
+
+      <h4>5. Code of conduct</h4>
+      <ul>
+        <li>Be respectful. No harassment, bullying, abuse, threats, hate speech or discrimination.</li>
+        <li>No profanity or slurs, in English or Filipino. VoiceLink automatically blocks posts, comments and names that contain them, including disguised spellings.</li>
+        <li>Don't share anyone's private information (addresses, phone numbers, photos, passwords) and don't pretend to be someone else.</li>
+        <li>Keep it constructive and on topic: suggestions, concerns and feedback about school life. No spam or advertising.</li>
+        <li>Use one account, keep your password to yourself, and remember you're responsible for what's posted under your account. Anonymous posts follow the same rules.</li>
+      </ul>
+
+      <h4>6. Moderation</h4>
+      <p>Admins and council members may, at their discretion and without notice: archive any post (it disappears from the wall and moves to a private archive), delete comments, pin posts, mark posts as In Review, Planned or Resolved, permanently delete archived posts, and restrict or remove accounts that break these rules. Only admins and council members can archive posts, view the archive or permanently delete posts. Section presidents and students cannot. Serious violations may be passed to school staff under the school's own rules.</p>
+      <p>Council members, admins and section presidents can create main posts. Every logged-in student can read their own section's wall, comment, star and save posts.</p>
+
+      <h4>7. Your choices</h4>
+      <p>You can change your display name and username with Edit profile, and your password from the side menu, any time. Changing your password signs you out of every device. To have a post, comment or your whole account removed, ask a council member.</p>
+
+      <h4>8. Changes</h4>
+      <p>These terms may be updated as VoiceLink changes. Continuing to use VoiceLink after an update means you accept the new version.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="terms-close">Close</button>
+      <button class="confirm-btn" id="terms-agree" style="display:none;">I agree</button>
+    </div>
+  </div>
+</div>
+
+<!-- edit profile -->
+<div class="modal-overlay" id="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+  <div class="modal">
+    <h3 id="profile-title">Edit profile</h3>
+    <p>Update how your name appears on posts and comments.</p>
+    <label class="field-label" for="profile-display-name">Display name</label>
+    <input type="text" id="profile-display-name" maxlength="60" autocomplete="name" placeholder="e.g. Jamie Cruz">
+    <label class="field-label" for="profile-username">Username</label>
+    <input type="text" id="profile-username" maxlength="40" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username">
+    <div class="modal-hint" id="profile-username-hint">3-40 characters: letters, numbers, dots, dashes, underscores.</div>
+    <div class="modal-note" id="profile-note" style="display:none;"></div>
+    <div class="modal-error" id="profile-error"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="profile-cancel">Cancel</button>
+      <button class="confirm-btn" id="profile-save">Save changes</button>
+    </div>
+  </div>
+</div>
+<script>
+/* =========================================================================
+   VoiceLink UI helpers — toasts + small render components.
+   Loaded before the main script in index.html. Exposes:
+     showToast(message, type)        type: 'success' | 'error' | 'warning' | 'info'
+     VL.emptyState({...})            -> HTML string
+     VL.statusBadge(status)          -> HTML string
+   ========================================================================= */
+(function () {
+  'use strict';
+
+  // Escapes & < > " ' ` so text can go into HTML strings and quoted attributes.
+  const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' };
+  const esc = (s) => (s == null ? '' : String(s)).replace(/[&<>"'`]/g, (ch) => ESC[ch]);
+
+  /* ------------------------------ Toasts ------------------------------ */
+
+  const GLYPHS = { success: '\u2713', error: '!', warning: '!', info: 'i' };
+  const DURATIONS = { success: 3000, info: 3500, warning: 4500, error: 5500 }; // ms
+  const MAX_VISIBLE = 4;
+
+  function getStack() {
+    let el = document.getElementById('vl-toast-stack');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'vl-toast-stack';
+      el.className = 'vl-toast-stack';
+      el.setAttribute('aria-live', 'polite');
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+
+  function dismiss(el, instant) {
+    if (!el || el.dataset.leaving) return;
+    el.dataset.leaving = '1';
+    el.classList.remove('is-in');
+    el.classList.add('is-out');
+    const remove = () => el.remove();
+    if (instant) return remove();
+    el.addEventListener('transitionend', remove, { once: true });
+    setTimeout(remove, 400); // fallback: reduced-motion users or background tabs never fire transitionend
+  }
+
+  // showToast('Saved!', 'success')  — message is shown as plain text (never parsed as HTML).
+  function showToast(message, type, options) {
+    if (message == null || message === '') return null;
+    if (!GLYPHS[type]) type = 'info';
+    options = options || {};
+
+    const stack = getStack();
+    while (stack.children.length >= MAX_VISIBLE) dismiss(stack.firstElementChild, true);
+
+    const toast = document.createElement('div');
+    toast.className = 'vl-toast vl-toast--' + type;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+
+    const icon = document.createElement('span');
+    icon.className = 'vl-toast__icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = GLYPHS[type];
+
+    const text = document.createElement('span');
+    text.className = 'vl-toast__text';
+    text.textContent = String(message);
+
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'vl-toast__close';
+    close.setAttribute('aria-label', 'Dismiss');
+    close.textContent = '\u00d7';
+    close.addEventListener('click', () => dismiss(toast));
+
+    toast.append(icon, text, close);
+    stack.appendChild(toast);
+    requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('is-in'))); // lets the slide-in transition run
+
+    // auto-dismiss; hovering pauses it
+    let timer = setTimeout(() => dismiss(toast), options.duration != null ? options.duration : DURATIONS[type]);
+    toast.addEventListener('mouseenter', () => clearTimeout(timer));
+    toast.addEventListener('mouseleave', () => { timer = setTimeout(() => dismiss(toast), 1500); });
+    return toast;
+  }
+
+  /* --------------------------- Empty states --------------------------- */
+
+  const EMPTY_ICONS = {
+    chat:     '<path d="M4 5.5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4.5 3.5V16.5H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z"/><path d="M8 10h8M8 13h5"/>',
+    pin:      '<path d="M9 4h6l-1 5 3 3v1.5H7V12l3-3-1-5Z"/><path d="M12 13.5V20"/>',
+    bookmark: '<path d="M7 4.5h10a1 1 0 0 1 1 1V20l-6-4-6 4V5.5a1 1 0 0 1 1-1Z"/>',
+    archive:  '<path d="M3.5 5h17v4h-17zM5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/>',
+    lock:     '<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>'
+  };
+
+  // VL.emptyState({ icon, title, text, actionLabel, action })
+  // `action: 'compose'` adds a button that jumps to the post box.
+  function emptyState(o) {
+    o = o || {};
+    const icon = EMPTY_ICONS[o.icon] || EMPTY_ICONS.chat;
+    const action = /^[a-z-]+$/.test(o.action || '') ? o.action : '';
+    const button = o.actionLabel && action
+      ? '<button type="button" class="vl-empty__btn" data-empty-action="' + action + '">' + esc(o.actionLabel) + '</button>'
+      : '';
+    return '<div class="vl-empty">' +
+      '<div class="vl-empty__icon" aria-hidden="true"><svg viewBox="0 0 24 24">' + icon + '</svg></div>' +
+      '<h3 class="vl-empty__title">' + esc(o.title) + '</h3>' +
+      '<p class="vl-empty__text">' + esc(o.text) + '</p>' +
+      button +
+    '</div>';
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-empty-action="compose"]');
+    if (!btn) return;
+    const box = document.getElementById('c-text');
+    if (box) {
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      box.focus({ preventScroll: true });
+    }
+  });
+
+  /* --------------------------- Status badges -------------------------- */
+
+  // Keys match the server's status values. "In Review" is the amber "pending" look.
+  const BADGES = {
+    in_review: ['pending', 'In Review'],
+    planned:   ['planned', 'Planned'],
+    resolved:  ['resolved', 'Resolved'],
+    archived:  ['archived', 'Archived']
+  };
+
+  function statusBadge(status) {
+    const b = BADGES[status];
+    return b ? '<span class="vl-badge vl-badge--' + b[0] + '">' + b[1] + '</span>' : '';
+  }
+
+  window.showToast = showToast;
+  window.VL = { showToast: showToast, emptyState: emptyState, statusBadge: statusBadge };
+})();
+</script>
+<script>
+  const API = '/api'; // backend base path
+
+  // Grade -> available sections. Add sections here as they're confirmed
+  // (grades 2, 3, 4, and 9 are still waiting on section names).
+  const GRADE_SECTIONS = {
+    '7': ['Genesis'],
+    '8': ['Daniel', 'Leviticus'],
+    '9': ['Jeremiah', 'Nehemiah'],
+    '10': ['Psalms', 'Proverbs']
+  };
+
+  const ICONS = {
+    star: '<svg viewBox="0 0 24 24"><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z"/></svg>',
+    bookmark: '<svg viewBox="0 0 24 24"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4-7 4V4.5a1 1 0 0 1 1-1Z"/></svg>',
+    comment: '<svg viewBox="0 0 24 24"><path d="M4 4.5h16a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H9l-5 4V5.5a1 1 0 0 1 1-1Z"/></svg>',
+    archive: '<svg viewBox="0 0 24 24"><path d="M3.5 5h17v4h-17zM5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/></svg>',
+    trash: '<svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2M7 7l1 13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-13M10 11v6M14 11v6"/></svg>'
+  };
+
+  // ---- Sound effects (Web Audio API, no audio files) ----
+  // Short, quiet synthesized tones. The context is created lazily on the first
+  // click (browsers block audio before a user gesture). The header speaker
+  // button mutes everything and the choice is remembered.
+  const Sound = (() => {
+    let ctx = null;
+    let enabled = true;
+    try { enabled = localStorage.getItem('voicelink_sound') !== 'off'; } catch (e) {}
+
+    function ensure() {
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        try { ctx = new AC(); } catch (e) { return null; }
+      }
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      return ctx;
+    }
+    function note(freq, delay, dur, type, vol) {
+      const c = ensure();
+      if (!c) return;
+      const t = c.currentTime + delay;
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(gain).connect(c.destination);
+      osc.start(t);
+      osc.stop(t + dur + 0.02);
+    }
+    const kinds = {
+      click:   () => note(720, 0, 0.05, 'sine', 0.04),
+      success: () => { note(523, 0, 0.09, 'sine', 0.05); note(784, 0.08, 0.14, 'sine', 0.05); },
+      error:   () => { note(220, 0, 0.09, 'triangle', 0.05); note(165, 0.08, 0.14, 'triangle', 0.05); }
+    };
+    return {
+      play(kind) { if (enabled && kinds[kind]) kinds[kind](); },
+      isEnabled() { return enabled; },
+      setEnabled(v) {
+        enabled = !!v;
+        try { localStorage.setItem('voicelink_sound', enabled ? 'on' : 'off'); } catch (e) {}
+      },
+      unlock() { if (enabled) ensure(); }
+    };
+  })();
+
+  // Clicks on anything interactive get the soft tick.
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('button, a, .tab-btn, [onclick], select, input[type="checkbox"]');
+    if (!el || el.disabled) return;
+    Sound.unlock();
+    if (el.id !== 'sound-toggle') Sound.play('click');
+  }, true);
+
+  // Form-style requests (posting, commenting, logging in, saving a profile) chime on success.
+  const CHIME_PATHS = /^\/(posts|auth\/(signup|login|profile|change-password)|managers\/(login|bootstrap)|posts\/\d+\/comments)$/;
+
+  // A 401 on any request other than logging in means the server no longer accepts our cookie
+  // (expired, or the password was changed on another device): drop back to the logged-out UI.
+  const LOGIN_PATHS = /^\/(auth\/(login|signup)|managers\/(login|bootstrap))/;
+  let sessionEnding = false;
+  function sessionExpired() {
+    if (sessionEnding) return;
+    sessionEnding = true;
+    session = null;
+    shared = { confessions: [], pinnedId: null };
+    setView('feed');
+    renderAccountBar();
+    renderFormBox();
+    renderAll();
+    showToast('You were signed out. Please log in again.', 'info');
+    setTimeout(() => { sessionEnding = false; }, 500);
+  }
+
+  // Talks to the real backend instead of window.storage/localStorage.
+  // credentials: 'include' sends the httpOnly session cookie the server
+  // sets on login — the server, not this file, is what verifies who you are.
+  async function api(path, options = {}) {
+    const res = await fetch(API + path, {
+      method: 'GET',
+      credentials: 'include',
+      headers: options.body ? { 'Content-Type': 'application/json' } : undefined,
+      ...options
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* no body */ }
+    const method = (options.method || 'GET').toUpperCase();
+    if (!res.ok) {
+      if (res.status === 401 && session && !LOGIN_PATHS.test(path)) sessionExpired();
+      if (method !== 'GET') Sound.play('error');
+      throw new Error((data && data.error) || 'Something went wrong.');
+    }
+    if (method !== 'GET' && CHIME_PATHS.test(path)) Sound.play('success');
+    return data;
+  }
+
+  function accountKey(name, grade, section) {
+    return name.trim().toLowerCase() + '|' + String(grade).trim().toLowerCase() + '|' + String(section).trim().toLowerCase();
+  }
+  function formatGradeSection(grade, section) {
+    if (!grade || !section) return '';
+    return `Grade ${grade} · ${section}`;
+  }
+  function gradeTagHTML(grade, section) {
+    const label = formatGradeSection(grade, section);
+    if (!label) return '';
+    return `<span class="grade-tag"><span class="tag-dot"></span>${escapeHTML(label)}</span>`;
+  }
+  function populateSectionDropdown(gradeSelect, sectionSelect) {
+    const grade = gradeSelect.value;
+    if (!grade) {
+      sectionSelect.innerHTML = '<option value="">Section</option>';
+      sectionSelect.disabled = true;
+      return;
+    }
+    const sections = GRADE_SECTIONS[grade] || [];
+    if (sections.length === 0) {
+      sectionSelect.innerHTML = '<option value="">No sections added yet</option>';
+      sectionSelect.disabled = true;
+      return;
+    }
+    sectionSelect.innerHTML = '<option value="">Section</option>' +
+      sections.map(s => `<option value="${escapeHTML(s)}">${escapeHTML(s)}</option>`).join('');
+    sectionSelect.disabled = false;
+  }
+
+  let shared = { confessions: [], pinnedId: null };
+  let myPrefs = { darkMode: false };
+  // session = whoever is logged in, any role: { id, name, role, grade, section }
+  // roles: admin | council | president | student (grade/section are null for admin/council)
+  let session = null;
+  const STATUS_LABELS = { in_review: 'In Review', planned: 'Planned', resolved: 'Resolved' };
+  const isStaff = () => !!session && (session.role === 'admin' || session.role === 'council');
+  const isAdmin = () => !!session && session.role === 'admin';
+  const canPost = () => !!session && ['admin', 'council', 'president'].includes(session.role);
+  let ready = false;
+
+  function setStatus(text) { document.getElementById('status-line').textContent = text; }
+  function applyTheme() { document.body.classList.toggle('dark', !!myPrefs.darkMode); }
+  // Escapes & < > " ' ` — safe for element text AND for quoted attribute values.
+  // Every piece of user-controlled text (names, posts, comments) goes through this
+  // before it is placed into an HTML string; nothing user-supplied is ever inserted raw.
+  const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' };
+  function escapeHTML(str) {
+    return (str == null ? '' : String(str)).replace(/[&<>"'`]/g, ch => HTML_ESCAPES[ch]);
+  }
+  // The server stamps posts with a real UTC timestamp (can't trust a
+  // client's clock); show it the same way the page always has.
+  function formatDate(sqlDate) {
+    const d = new Date(String(sqlDate).replace(' ', 'T') + 'Z');
+    return isNaN(d.getTime()) ? escapeHTML(sqlDate) : d.toLocaleDateString();
+  }
+
+  // Posts come from the server now (scoped server-side to your own section,
+  // or every section if you're a manager) rather than one shared blob every
+  // browser downloaded in full.
+  async function loadShared() {
+    try {
+      const qs = isStaff() && viewSection ? `?grade=${encodeURIComponent(viewSection.grade)}&section=${encodeURIComponent(viewSection.section)}` : '';
+      const data = await api('/posts' + qs);
+      shared = { confessions: data.posts, pinnedId: data.pinnedId };
+    } catch (e) {
+      setStatus('could not load — check your connection and try again.');
+    }
+  }
+
+  // Dark-mode preference stays a plain per-device setting; nothing sensitive,
+  // no need to round-trip it through the backend.
+  function loadMyPrefs() {
+    try { myPrefs = JSON.parse(localStorage.getItem('voicelink_prefs')) || { darkMode: false }; }
+    catch (e) { myPrefs = { darkMode: false }; }
+  }
+  function saveMyPrefs() { localStorage.setItem('voicelink_prefs', JSON.stringify(myPrefs)); }
+
+  // Who you are lives in an httpOnly session cookie the server manages —
+  // this just asks the server who that cookie currently belongs to.
+  async function loadSession() {
+    try {
+      const data = await api('/auth/session');
+      session = data.user || null;
+    } catch (e) { session = null; }
+  }
+
+  async function init() {
+    setStatus('loading...');
+    loadMyPrefs();
+    await loadSession();
+    applyTheme();
+    if (session) await loadShared();
+    ready = true;
+    setStatus('everyone viewing this link sees the same wall.');
+    renderAccountBar();
+    renderFormBox();
+    renderAll();
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', async () => {
+    myPrefs.darkMode = !myPrefs.darkMode;
+    applyTheme();
+    await saveMyPrefs();
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      renderAll();
+    });
+  });
+
+  document.getElementById('refresh-btn').addEventListener('click', async () => {
+    setStatus('refreshing...');
+    await loadShared();
+    setStatus('everyone viewing this link sees the same wall.');
+    renderAll();
+  });
+
+  // grade -> section dropdown wiring
+  document.getElementById('signup-grade').addEventListener('change', () => {
+    populateSectionDropdown(document.getElementById('signup-grade'), document.getElementById('signup-section'));
+  });
+  document.getElementById('userlogin-grade').addEventListener('change', () => {
+    populateSectionDropdown(document.getElementById('userlogin-grade'), document.getElementById('userlogin-section'));
+  });
+
+  function renderAccountBar() {
+    const bar = document.getElementById('account-bar');
+    syncPanel();
+    document.getElementById('manager-open').textContent = isStaff() ? 'log out (staff)' : 'staff login';
+    if (session) {
+      const roleTag = session.role === 'student' ? '' :
+        `<span class="grade-tag"><span class="tag-dot"></span>${escapeHTML(session.role)}</span>`;
+      bar.innerHTML = `<span class="name" title="${escapeHTML(session.name)}">${escapeHTML(session.name)}</span>${gradeTagHTML(session.grade, session.section)}${roleTag}<button class="link-btn" id="edit-profile-btn">Edit profile</button><button class="link-btn" id="logout-btn">Log out</button>`;
+      document.getElementById('edit-profile-btn').addEventListener('click', openProfile);
+      document.getElementById('logout-btn').addEventListener('click', async () => {
+        await api('/auth/logout', { method: 'POST' }).catch(() => {});
+        session = null;
+        shared = { confessions: [], pinnedId: null };
+        renderAccountBar();
+        renderFormBox();
+        renderAll();
+      });
+    } else {
+      bar.innerHTML = `<button class="link-btn" id="bar-login-btn">Log in</button>`;
+      document.getElementById('bar-login-btn').addEventListener('click', () => openModal('userlogin-modal'));
+    }
+  }
+
+  function renderFormBox() {
+    const box = document.getElementById('form-box');
+    box.style.display = '';
+    if (!session) {
+      box.innerHTML = `
+        <div class="logged-out-box">
+          <p>Log in or create an account to join in.</p>
+          <div class="logged-out-actions">
+            <button id="fb-login">Log in</button>
+            <button class="primary" id="fb-signup">Sign up</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('fb-login').addEventListener('click', () => openModal('userlogin-modal'));
+      document.getElementById('fb-signup').addEventListener('click', () => openModal('signup-modal'));
+      return;
+    }
+
+    // Students can read, comment and star, but can't create main posts — hide the form.
+    if (!canPost()) {
+      box.innerHTML = '';
+      box.style.display = 'none';
+      return;
+    }
+
+    const staff = isStaff();
+    // admin/council have no section of their own, so they pick which one to post to.
+    const targetPicker = staff ? `
+      <label class="field-label">Comments open to</label>
+      <div class="grade-section-row">
+        <div><select id="c-grade"><option value="">Grade</option>${
+          Object.keys(GRADE_SECTIONS).map(g => `<option value="${g}">Grade ${g}</option>`).join('')
+        }</select></div>
+        <div><select id="c-section" disabled><option value="">Section</option></select></div>
+      </div>` : '';
+    const anonRow = staff ? '' : `
+      <div class="checkbox-row">
+        <input type="checkbox" id="c-anon">
+        <label for="c-anon" style="margin:0;">setting to enable for anonymity</label>
+      </div>`;
+
+    box.innerHTML = `
+      <h2 class="composer__title">Write a post</h2>
+      <label class="field-label">Your name</label>
+      <div class="name-fields">
+        <div><input type="text" value="${escapeHTML(session.name)}" disabled></div>
+        <div class="tag-display">${gradeTagHTML(session.grade, session.section)}</div>
+      </div>
+      ${targetPicker}
+      ${anonRow}
+      <textarea id="c-text" placeholder="type ur opinion here"></textarea>
+      <div class="error-text" id="c-error">write something before posting.</div>
+      <button class="submit-btn" id="c-submit">Post</button>
+    `;
+
+    if (staff) {
+      document.getElementById('c-grade').addEventListener('change', () => {
+        populateSectionDropdown(document.getElementById('c-grade'), document.getElementById('c-section'));
+      });
+      presetComposerSection();
+    }
+
+    document.getElementById('c-submit').addEventListener('click', async () => {
+      if (!ready || !canPost()) return;
+      const anonEl = document.getElementById('c-anon');
+      const anon = !!(anonEl && anonEl.checked);
+      const text = document.getElementById('c-text').value.trim();
+      const errorEl = document.getElementById('c-error');
+      const payload = { text, anon };
+
+      if (!text) { errorEl.style.display = 'block'; return; }
+      errorEl.style.display = 'none';
+      if (staff) {
+        payload.grade = document.getElementById('c-grade').value;
+        payload.section = document.getElementById('c-section').value;
+        if (!payload.grade || !payload.section) { showToast('Pick the grade and section whose students can comment.', 'warning'); return; }
+      }
+
+      const btn = document.getElementById('c-submit');
+      btn.disabled = true;
+      btn.textContent = 'posting...';
+
+      try {
+        await api('/posts', { method: 'POST', body: JSON.stringify(payload) });
+        if (anonEl) anonEl.checked = false;
+        document.getElementById('c-text').value = '';
+        await loadShared();
+        renderAll();
+      } catch (e) {
+        showToast(e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Post';
+      }
+    });
+  }
+
+  function cardHTML(c) {
+    c = Object.assign({}, c, { id: Number(c.id) || 0 }); // ids go into onclick="" attributes: force numbers
+    const status = STATUS_LABELS[c.status] ? c.status : null; // only known status keys reach the markup
+    const staff = isStaff();
+    const isPinned = shared.pinnedId === c.id;
+    // Anonymous posts always read "Anonymous". Only an authorised viewer who pressed "Reveal author" sees more.
+    const info = revealed[c.id];
+    const nameLabel = c.anon
+      ? '<span class="anon-name">Anonymous</span>' + (info
+          ? `<span class="reveal">${escapeHTML([info.name + (info.username ? ' (@' + info.username + ')' : ''), formatGradeSection(info.grade, info.section)].filter(Boolean).join(' · '))}</span>` : '')
+      : escapeHTML(c.name);
+    // Posts by admin/council are visible to every section and get a role tag instead of a section tag.
+    const roleLabel = c.authorRole === 'admin' ? 'admin' : c.authorRole === 'council' ? 'council' : '';
+    const tag = roleLabel
+      ? `<span class="grade-tag"><span class="tag-dot"></span>${roleLabel}</span>`
+      : (c.anon ? '' : gradeTagHTML(c.grade, c.section));
+    // Council posts reach every section, but comments/reactions stay limited to the post's own
+    // section (the server enforces this and sends no comments for everyone else).
+    const interactive = c.canInteract !== false;
+    const lockedAttr = interactive ? '' : ' disabled title="Limited to this post\'s section"';
+    const pinnedTag = isPinned ? ` <span class="pinned-flag">pinned</span>` : '';
+    const statusTag = status ? ' ' + VL.statusBadge(status) : '';
+    const cardClass = 'card' + (isPinned ? ' card--pinned' : '');
+    const starred = !!c.starred;
+    const bookmarked = !!c.bookmarked;
+
+    const commentsHTML = (c.comments || []).map(cm =>
+      `<div class="comment">${staff ? `<button class="comment-del" title="Delete comment" onclick="deleteComment(${c.id}, ${Number(cm.id) || 0})">&times;</button>` : ''}<span class="c-name">${escapeHTML(cm.name)}:</span>${escapeHTML(cm.text)}</div>`
+    ).join('');
+
+    // Moderation controls (admin + council only; the server enforces this too). Posts can't be
+    // deleted from the wall: "archive" is the only removal, and presidents/students get no controls.
+    let modControls = '';
+    if (staff) {
+      const statusSelect = `<select class="pin-btn status-select" onchange="setPostStatus(${c.id}, this.value)" aria-label="Status">
+        <option value="">No status</option>
+        ${Object.keys(STATUS_LABELS).map(k => `<option value="${k}" ${status === k ? 'selected' : ''}>${STATUS_LABELS[k]}</option>`).join('')}
+      </select>`;
+      const pinBtn = isPinned
+        ? `<button class="pin-btn" onclick="unpinConfession()">Unpin</button>`
+        : `<button class="pin-btn" onclick="pinConfession(${c.id})">Pin</button>`;
+      const revealBtn = c.anon && canSeeAnon() && !info
+        ? `<button class="pin-btn" onclick="revealAuthor(${c.id})">Reveal author</button>` : '';
+      modControls = revealBtn + pinBtn + statusSelect +
+        `<button class="action-btn archive-btn" title="Archive post" aria-label="Archive post" onclick="requestArchive(${c.id})">${ICONS.archive}</button>`;
+    }
+
+    // Small square avatar: initial for named posts, "?" for anonymous, filled navy for council/admin posts.
+    const initial = c.anon ? '?' : (Array.from(String(c.name || '?').trim())[0] || '?').toUpperCase();
+    const avatar = `<span class="avatar${c.official ? ' avatar--official' : ''}${c.anon ? ' avatar--anon' : ''}" aria-hidden="true">${escapeHTML(initial)}</span>`;
+
+    return `
+      <div class="${cardClass}">
+        <div class="card-meta">
+          ${avatar}<span class="card-name">${nameLabel}</span>${tag}<span class="meta-date">${formatDate(c.date)}</span>
+          <span class="card-flags">${pinnedTag}${statusTag}</span>
+        </div>
+        <div class="card-text">${escapeHTML(c.text)}</div>
+        <div class="card-actions">
+          <button class="action-btn star-btn ${starred ? 'is-active' : ''}"${lockedAttr} onclick="toggleStar(${c.id})" aria-label="Star this post">${ICONS.star}<span>${c.stars || 0}</span></button>
+          <button class="action-btn" onclick="toggleComments(${c.id})" aria-label="Comments">${ICONS.comment}<span>${interactive ? (c.comments || []).length : ''}</span></button>
+          <button class="action-btn ${bookmarked ? 'is-active' : ''}"${lockedAttr} onclick="toggleBookmark(${c.id})" aria-label="Save this post">${ICONS.bookmark}</button>
+          ${modControls ? `<div class="card-mod">${modControls}</div>` : ''}
+        </div>
+        <div class="comments-box" id="comments-${c.id}">
+          ${interactive ? `${commentsHTML}
+          <div class="comment-input-row">
+            <input type="text" id="comment-input-${c.id}" placeholder="add a comment...">
+            <button onclick="addComment(${c.id})">Post</button>
+          </div>` : `<div class="comments-locked">Comments and reactions on this post are limited to ${escapeHTML(formatGradeSection(c.grade, c.section)) || 'its section'}.</div>`}
+        </div>
+      </div>
+    `;
+  }
+
+  // The server decides what's in the feed: admin/council see everything; everyone else gets
+  // their own section's posts plus council/admin posts and the pinned post from any section.
+  // This filter mirrors that rule as a safety net (it must NOT be stricter than the server,
+  // or council posts from other sections would be hidden here).
+  function visibleConfessions() {
+    if (isStaff()) return shared.confessions;
+    if (!session) return [];
+    return shared.confessions.filter(c =>
+      c.official || c.id === shared.pinnedId ||
+      (c.grade === session.grade && c.section === session.section));
+  }
+
+  function renderAll() {
+    if (!session) { for (const k in revealed) delete revealed[k]; }
+    renderSectionTabs();
+    const list = visibleConfessions();
+    renderWallHead(list.length);
+    const canSeePosts = !!session;
+    const loggedOutState = VL.emptyState({ icon: 'lock', title: 'Welcome to VoiceLink', text: 'Log in to see what’s happening in your section.' });
+    const linkStyle = 'cursor:pointer;text-decoration:underline;color:var(--accent);';
+    const staffLinks = `<a onclick="openManagerManager()" style="${linkStyle}">Manage staff accounts</a>` +
+      (isAdmin() ? ` &middot; <a onclick="openPresidentManager()" style="${linkStyle}">Assign section presidents</a>` : '');
+    const panelTitle = isAdmin() ? 'Admin panel' : 'Council panel';
+
+    const pinnedEl = document.getElementById('tab-pinned');
+    let staffPanel = '';
+    if (isStaff()) {
+      staffPanel = `<div class="manager-panel"><h3>${panelTitle}</h3>Use "Pin" on any post in "All posts" to feature it here. You can archive any post, delete comments, and set a status (In Review, Planned, Resolved). Archived posts are under "Archived posts" in the side menu. Use the section tabs above to switch between walls. ${staffLinks}</div>`;
+    }
+    if (!canSeePosts) {
+      pinnedEl.innerHTML = loggedOutState;
+    } else {
+      const pinned = list.find(c => c.id === shared.pinnedId);
+      pinnedEl.innerHTML = staffPanel + (pinned ? cardHTML(pinned) : VL.emptyState({ icon: 'pin', title: 'Nothing pinned yet', text: 'Important announcements from the student council will be pinned here.' }));
+    }
+
+    // Friendly empty state; only people who can post are invited to post.
+    const emptyHTML = canPost()
+      ? VL.emptyState({ icon: 'chat', title: 'It’s quiet in here!', text: 'Got an idea to make campus better? Be the first to share your thoughts.', actionLabel: 'Share your thoughts', action: 'compose' })
+      : VL.emptyState({ icon: 'chat', title: 'It’s quiet in here!', text: 'Nothing has been shared in your section yet. Check back soon, and join in when something goes up.' });
+    const allEl = document.getElementById('tab-all');
+    if (!canSeePosts) {
+      allEl.innerHTML = loggedOutState;
+    } else {
+      allEl.innerHTML = (isStaff() ? `<div class="manager-panel"><h3>${panelTitle}</h3>You're logged in. Pin, status and archive controls appear on each card below. Use the section tabs above to switch between walls. ${staffLinks}</div>` : '') +
+        (list.length ? list.map(cardHTML).join('') : emptyHTML);
+    }
+
+    const bookmarksEl = document.getElementById('tab-bookmarks');
+    const bookmarked = list.filter(c => c.bookmarked);
+    bookmarksEl.innerHTML = bookmarked.length
+      ? bookmarked.map(cardHTML).join('')
+      : VL.emptyState({ icon: 'bookmark', title: 'Nothing saved yet', text: 'Tap the bookmark on any post to keep it here for later.' });
+  }
+
+  function findConfession(id) { return shared.confessions.find(c => c.id === id); }
+
+  window.toggleStar = async function(id) {
+    try {
+      const data = await api(`/posts/${id}/star`, { method: 'POST' });
+      const c = findConfession(id);
+      if (c) { c.stars = data.stars; c.starred = data.starred; }
+      renderAll();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  window.toggleBookmark = async function(id) {
+    try {
+      const data = await api(`/posts/${id}/bookmark`, { method: 'POST' });
+      const c = findConfession(id);
+      if (c) c.bookmarked = data.bookmarked;
+      renderAll();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  window.toggleComments = function(id) {
+    document.getElementById('comments-' + id).classList.toggle('open');
+  };
+
+  window.addComment = async function(id) {
+    const input = document.getElementById('comment-input-' + id);
+    const text = input.value.trim();
+    if (!text) return;
+    try {
+      // Name is stamped server-side from your real session — can't be spoofed.
+      await api(`/posts/${id}/comments`, { method: 'POST', body: JSON.stringify({ text }) });
+      await loadShared();
+      renderAll();
+      setTimeout(() => {
+        const box = document.getElementById('comments-' + id);
+        if (box) box.classList.add('open');
+      }, 0);
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  window.pinConfession = async function(id) {
+    try { await api(`/posts/${id}/pin`, { method: 'POST' }); await loadShared(); renderAll(); }
+    catch (e) { showToast(e.message, 'error'); }
+  };
+  window.unpinConfession = async function() {
+    try { await api('/posts/unpin', { method: 'POST' }); await loadShared(); renderAll(); }
+    catch (e) { showToast(e.message, 'error'); }
+  };
+
+  async function archiveConfession(id) {
+    try {
+      await api(`/posts/${id}/archive`, { method: 'PUT' });
+      await loadShared();
+      renderAll();
+      showToast('Post archived', 'success');
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+
+  // Posts can't be deleted straight from the wall: removing one archives it (soft delete).
+  window.requestArchive = function(id) {
+    if (!findConfession(id)) return;
+    if (confirm('Archive this post? It will disappear from the wall and move to Archived posts.')) archiveConfession(id);
+  };
+
+  window.setPostStatus = async function(id, status) {
+    try {
+      await api(`/posts/${id}/status`, { method: 'POST', body: JSON.stringify({ status: status || null }) });
+      await loadShared();
+      renderAll();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  window.deleteComment = async function(postId, commentId) {
+    if (!isStaff() || !confirm('Delete this comment?')) return;
+    try {
+      await api(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' });
+      await loadShared();
+      renderAll();
+      setTimeout(() => {
+        const box = document.getElementById('comments-' + postId);
+        if (box) box.classList.add('open');
+      }, 0);
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  document.getElementById('signup-cancel').addEventListener('click', () => closeModal('signup-modal'));
+  document.getElementById('switch-to-login').addEventListener('click', () => { closeModal('signup-modal'); openModal('userlogin-modal'); });
+  document.getElementById('signup-confirm').addEventListener('click', async () => {
+    const name = document.getElementById('signup-name').value.trim();
+    const grade = document.getElementById('signup-grade').value;
+    const section = document.getElementById('signup-section').value;
+    const pass = document.getElementById('signup-pass').value;
+    const pass2 = document.getElementById('signup-pass2').value;
+    const errEl = document.getElementById('signup-error');
+
+    if (!name || !grade || !section || !pass || !pass2) { errEl.textContent = 'Fill in every field.'; errEl.style.display = 'block'; return; }
+    if (pass.length < 6) { errEl.textContent = 'Password needs to be at least 6 characters.'; errEl.style.display = 'block'; return; }
+    if (pass !== pass2) { errEl.textContent = "Passwords don't match."; errEl.style.display = 'block'; return; }
+    if (!document.getElementById('signup-terms').checked) { errEl.textContent = 'Please agree to the Terms of Service first.'; errEl.style.display = 'block'; return; }
+
+    try {
+      const data = await api('/auth/signup', { method: 'POST', body: JSON.stringify({ name, grade, section, password: pass, agreedToTerms: true }) });
+      errEl.style.display = 'none';
+      session = data.user;
+
+      document.getElementById('signup-name').value = '';
+      document.getElementById('signup-grade').value = '';
+      populateSectionDropdown(document.getElementById('signup-grade'), document.getElementById('signup-section'));
+      document.getElementById('signup-pass').value = '';
+      document.getElementById('signup-pass2').value = '';
+      document.getElementById('signup-terms').checked = false;
+      document.getElementById('signup-confirm').disabled = true;
+      closeModal('signup-modal');
+      renderAccountBar();
+      renderFormBox();
+      await loadShared();
+      renderAll();
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.style.display = 'block';
+    }
+  });
+
+  document.getElementById('userlogin-cancel').addEventListener('click', () => closeModal('userlogin-modal'));
+  document.getElementById('switch-to-signup').addEventListener('click', () => { closeModal('userlogin-modal'); openModal('signup-modal'); });
+  document.getElementById('userlogin-confirm').addEventListener('click', async () => {
+    const name = document.getElementById('userlogin-name').value.trim();
+    const grade = document.getElementById('userlogin-grade').value;
+    const section = document.getElementById('userlogin-section').value;
+    const pass = document.getElementById('userlogin-pass').value;
+    const errEl = document.getElementById('userlogin-error');
+
+    if (!name || !grade || !section || !pass) { errEl.textContent = 'Fill in every field.'; errEl.style.display = 'block'; return; }
+
+    try {
+      const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ name, grade, section, password: pass }) });
+      errEl.style.display = 'none';
+      session = data.user;
+
+      document.getElementById('userlogin-name').value = '';
+      document.getElementById('userlogin-grade').value = '';
+      populateSectionDropdown(document.getElementById('userlogin-grade'), document.getElementById('userlogin-section'));
+      document.getElementById('userlogin-pass').value = '';
+      closeModal('userlogin-modal');
+      renderAccountBar();
+      renderFormBox();
+      await loadShared();
+      renderAll();
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.style.display = 'block';
+    }
+  });
+
+  document.getElementById('manager-open').addEventListener('click', async () => {
+    if (isStaff()) {
+      await api('/auth/logout', { method: 'POST' }).catch(() => {});
+      session = null;
+      shared = { confessions: [], pinnedId: null };
+      renderAccountBar();
+      renderFormBox();
+      renderAll();
+      return;
+    }
+    openModal('login-modal');
+  });
+  function resetManagerModal() {
+    document.getElementById('manager-username').value = '';
+    document.getElementById('manager-pass').value = '';
+    document.getElementById('manager-setup-name').value = '';
+    document.getElementById('manager-setup-key').value = '';
+    document.getElementById('manager-setup-fields').style.display = 'none';
+    document.getElementById('manager-setup-toggle').textContent = 'First admin? Set up account';
+  }
+  document.getElementById('login-cancel').addEventListener('click', () => {
+    closeModal('login-modal');
+    resetManagerModal();
+  });
+  document.getElementById('manager-setup-toggle').addEventListener('click', () => {
+    const fields = document.getElementById('manager-setup-fields');
+    const opening = fields.style.display === 'none';
+    fields.style.display = opening ? 'block' : 'none';
+    document.getElementById('manager-setup-toggle').textContent = opening ? 'Back to normal login' : 'First admin? Set up account';
+  });
+  document.getElementById('login-confirm').addEventListener('click', async () => {
+    const username = document.getElementById('manager-username').value.trim();
+    const pass = document.getElementById('manager-pass').value;
+    const settingUp = document.getElementById('manager-setup-fields').style.display !== 'none';
+
+    try {
+      let data;
+      if (settingUp) {
+        data = await api('/managers/bootstrap', {
+          method: 'POST',
+          body: JSON.stringify({
+            username, password: pass,
+            name: document.getElementById('manager-setup-name').value.trim(),
+            setupKey: document.getElementById('manager-setup-key').value
+          })
+        });
+      } else {
+        data = await api('/managers/login', { method: 'POST', body: JSON.stringify({ username, password: pass }) });
+      }
+      session = data.user; // one cookie, one identity — staff login replaces any student session
+      closeModal('login-modal');
+      resetManagerModal();
+      renderAccountBar();
+      renderFormBox();
+      await loadShared();
+      renderAll();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  });
+
+  // Staff list (admin + council can view; only admins can add accounts).
+  // Uses the same confirm()/prompt() style as the rest of the file.
+  window.openManagerManager = async function() {
+    if (!isStaff()) return;
+    try {
+      const data = await api('/managers');
+      const list = data.managers.map(m => `${m.name} (@${m.username}) — ${m.role}`).join('\n') || 'none yet';
+      if (!isAdmin()) { alert(`Current staff:\n${list}`); return; }
+      if (!confirm(`Current staff:\n${list}\n\nAdd another staff account?`)) return;
+      const name = prompt('Display name for the new account:');
+      if (!name) return;
+      const username = prompt('Username for the new account:');
+      if (!username) return;
+      const password = prompt('Temporary password for the new account:');
+      if (!password) return;
+      const role = (prompt("Role: type 'admin' or 'council'", 'council') || '').trim().toLowerCase();
+      if (!role) return;
+      await api('/managers', { method: 'POST', body: JSON.stringify({ name, username, password, role }) });
+      showToast('Staff account created.', 'success');
+      accessLoadedFor = null; renderAccessPanel();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  };
+
+  // Admin only: make a student the president of their section, or remove it.
+  window.openPresidentManager = async function() {
+    if (!isAdmin()) return;
+    try {
+      const { students } = await api('/managers/students');
+      if (!students.length) { showToast('No student accounts yet.', 'info'); return; }
+      const lines = students.map(s =>
+        `${s.id}: ${s.name} — Grade ${s.grade} · ${s.section}${s.role === 'president' ? '  [PRESIDENT]' : ''}`
+      ).join('\n');
+      const input = prompt(`Enter the ID of a student to toggle president on/off:\n\n${lines}`);
+      if (!input) return;
+      const target = students.find(s => String(s.id) === input.trim());
+      if (!target) { showToast('No student with that ID.', 'warning'); return; }
+      const role = target.role === 'president' ? 'student' : 'president';
+      await api(`/managers/students/${target.id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
+      showToast(`${target.name} is now ${role === 'president' ? 'president' : 'a regular student'} of Grade ${target.grade} · ${target.section}. They'll see the change on their next request.`, 'success');
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  };
+
+  // ---- Edit profile ----
+  const STAFF_ROLES_CLIENT = ['admin', 'council'];
+
+  async function openProfile() {
+    if (!session) return;
+    let user = session;
+    try {
+      const data = await api('/auth/session'); // fresh values, including username
+      if (data.user) user = data.user;
+    } catch (e) { /* fall back to what we have */ }
+
+    const staff = STAFF_ROLES_CLIENT.includes(user.role);
+    document.getElementById('profile-display-name').value = user.name || '';
+    const uEl = document.getElementById('profile-username');
+    uEl.value = user.username || '';
+    uEl.placeholder = staff ? 'username' : 'optional';
+    document.getElementById('profile-username-hint').textContent = staff
+      ? 'Required. You use this to log in. 3-40 characters: letters, numbers, dots, dashes, underscores.'
+      : 'Optional. 3-40 characters: letters, numbers, dots, dashes, underscores.';
+    const note = document.getElementById('profile-note');
+    if (staff) {
+      note.style.display = 'none';
+    } else {
+      note.style.display = 'block';
+      note.textContent = 'Heads up: you log in with your display name, grade and section, so changing your name changes how you log in.';
+    }
+    document.getElementById('profile-error').style.display = 'none';
+    openModal('profile-modal');
+    setTimeout(() => document.getElementById('profile-display-name').focus(), 30);
+  }
+
+  function profileError(msg) {
+    const el = document.getElementById('profile-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  async function saveProfile() {
+    if (!session) return;
+    const displayName = document.getElementById('profile-display-name').value.trim().replace(/\s+/g, ' ');
+    const username = document.getElementById('profile-username').value.trim();
+    const staff = STAFF_ROLES_CLIENT.includes(session.role);
+
+    if (!displayName) { Sound.play('error'); return profileError('Display name can\'t be empty.'); }
+    if (displayName.length > 60) { Sound.play('error'); return profileError('Display name must be under 60 characters.'); }
+    if (staff && !username) { Sound.play('error'); return profileError('Staff accounts need a username to log in.'); }
+    if (username && !/^[a-zA-Z0-9._-]{3,40}$/.test(username)) {
+      Sound.play('error');
+      return profileError('Username must be 3-40 characters: letters, numbers, dots, dashes, underscores.');
+    }
+
+    const btn = document.getElementById('profile-save');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    try {
+      const data = await api('/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ display_name: displayName, username: username || null })
+      });
+      session = { ...session, name: data.user.display_name, username: data.user.username };
+      closeModal('profile-modal');
+      renderAccountBar();
+      renderFormBox();
+      await loadShared();
+      renderAll();
+      showToast('Profile updated', 'success');
+    } catch (e) {
+      profileError(e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save changes';
+    }
+  }
+
+  document.getElementById('profile-cancel').addEventListener('click', () => closeModal('profile-modal'));
+  document.getElementById('profile-save').addEventListener('click', saveProfile);
+  ['profile-display-name', 'profile-username'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') saveProfile(); });
+  });
+
+  // ---- Terms & Privacy ----
+  const termsBox = document.getElementById('signup-terms');
+  const signupBtn = document.getElementById('signup-confirm');
+  termsBox.addEventListener('change', () => { signupBtn.disabled = !termsBox.checked; });
+  function openTerms() {
+    const fromSignup = document.getElementById('signup-modal').classList.contains('open');
+    document.getElementById('terms-agree').style.display = fromSignup && !termsBox.checked ? '' : 'none';
+    openModal('terms-modal');
+    document.querySelector('#terms-modal .terms-body').scrollTop = 0;
+  }
+  document.querySelectorAll('[data-open-terms]').forEach(b => b.addEventListener('click', openTerms));
+  document.getElementById('terms-open').addEventListener('click', openTerms);
+  document.getElementById('terms-close').addEventListener('click', () => closeModal('terms-modal'));
+  document.getElementById('terms-agree').addEventListener('click', () => {
+    termsBox.checked = true;
+    signupBtn.disabled = false;
+    closeModal('terms-modal');
+  });
+
+  // Escape closes any open modal; clicking the dimmed backdrop does too.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const open = document.querySelectorAll('.modal-overlay.open');
+    if (open.length) open[open.length - 1].classList.remove('open'); // only the top-most (e.g. Terms over Sign up)
+    else if (document.body.classList.contains('panel-open') && !wideQuery.matches) setPanel(false);
+  });
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
+  });
+
+  // Sound on/off (header speaker button)
+  (function () {
+    const btn = document.getElementById('sound-toggle');
+    function paint() {
+      btn.classList.toggle('muted', !Sound.isEnabled());
+      btn.setAttribute('aria-pressed', String(Sound.isEnabled()));
+    }
+    btn.addEventListener('click', () => {
+      Sound.setEnabled(!Sound.isEnabled());
+      paint();
+      Sound.play('click');
+    });
+    paint();
+  })();
+
+  // Mobile account menu (the hamburger only shows on phones; see the CSS).
+  (function () {
+    const btn = document.getElementById('menu-toggle');
+    function setOpen(open) {
+      document.body.classList.toggle('menu-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Close account menu' : 'Open account menu');
+    }
+    btn.addEventListener('click', () => setOpen(!document.body.classList.contains('menu-open')));
+    // choosing something in the menu closes it
+    document.getElementById('account-bar').addEventListener('click', (e) => {
+      if (e.target.closest('button')) setOpen(false);
+    });
+    // tapping elsewhere or pressing Escape closes it
+    document.addEventListener('click', (e) => {
+      if (document.body.classList.contains('menu-open') && !e.target.closest('header')) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+    window.matchMedia('(min-width: 641px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+  })();
+
+  // ---- Wall furniture: header, staff section switcher, directory, author reveal, access panel ----
+  let viewSection = null;   // staff only: { grade, section } of the wall being viewed, or null = every section
+  const revealed = {};      // post id -> author details an authorised viewer chose to reveal (memory only, never stored)
+  const canSeeAnon = () => !!(session && session.canSeeAnon);
+
+  function renderDirectory() {
+    const mine = session && session.grade && session.section ? session.grade + '|' + session.section : '';
+    document.getElementById('directory').innerHTML = Object.keys(GRADE_SECTIONS).map(g =>
+      `<div><dt>Grade ${escapeHTML(g)}</dt><dd>${GRADE_SECTIONS[g].map(sec =>
+        (g + '|' + sec) === mine ? `<span class="is-mine">${escapeHTML(sec)}</span>` : `<span>${escapeHTML(sec)}</span>`).join(', ')}</dd></div>`
+    ).join('');
+  }
+
+  function renderWallHead(count) {
+    const title = !session ? 'Student wall'
+      : isStaff() ? (viewSection ? formatGradeSection(viewSection.grade, viewSection.section) : 'All sections')
+      : formatGradeSection(session.grade, session.section);
+    document.getElementById('wall-title').textContent = title;
+    document.getElementById('wall-scope').textContent = !session ? 'Log in to read your section’s wall'
+      : isStaff() ? 'Staff view' : 'Your section’s private wall';
+    document.getElementById('wall-count').textContent = session ? `· ${count} ${count === 1 ? 'post' : 'posts'}` : '';
+  }
+
+  // Staff switch between section walls here; students never see this bar (and the server ignores the filter for them).
+  function renderSectionTabs() {
+    const nav = document.getElementById('section-tabs');
+    if (!isStaff()) { viewSection = null; nav.hidden = true; nav.innerHTML = ''; return; }
+    nav.hidden = false;
+    const btn = (label, g, sec, active) =>
+      `<button class="section-btn${active ? ' active' : ''}" data-grade="${escapeHTML(g)}" data-section="${escapeHTML(sec)}"${active ? ' aria-current="true"' : ''}>${escapeHTML(label)}</button>`;
+    nav.innerHTML = btn('All sections', '', '', !viewSection) +
+      Object.keys(GRADE_SECTIONS).map(g => GRADE_SECTIONS[g].map(sec =>
+        btn(`${g} · ${sec}`, g, sec, !!viewSection && viewSection.grade === g && viewSection.section === sec)).join('')).join('');
+  }
+  document.getElementById('section-tabs').addEventListener('click', async (e) => {
+    const b = e.target.closest('.section-btn');
+    if (!b) return;
+    viewSection = b.dataset.grade ? { grade: b.dataset.grade, section: b.dataset.section } : null;
+    await loadShared();
+    renderAll();
+    presetComposerSection();
+  });
+
+  // The post box for staff defaults to the section whose wall they are looking at.
+  function presetComposerSection() {
+    const g = document.getElementById('c-grade'), s = document.getElementById('c-section');
+    if (!g || !s || !viewSection) return;
+    g.value = viewSection.grade;
+    populateSectionDropdown(g, s);
+    s.value = viewSection.section;
+  }
+
+  // Look up who wrote an anonymous post. The server allows admins and authorised council only, and logs it.
+  window.revealAuthor = async function(id) {
+    try {
+      const data = await api(`/posts/${id}/author`);
+      revealed[id] = data.author;
+      renderAll();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  // Admin only: choose which council members may see anonymous authors.
+  let accessLoadedFor = null;
+  async function refreshAccessList() {
+    const list = document.getElementById('access-list');
+    try {
+      const data = await api('/managers');
+      const council = data.managers.filter(m => m.role === 'council');
+      list.innerHTML = council.length ? council.map(m =>
+        `<div class="access-row"><span>${escapeHTML(m.name)}<small>@${escapeHTML(m.username)}</small></span>` +
+        `<button class="pin-btn${m.can_see_anon ? ' is-on' : ''}" data-user="${escapeHTML(m.username)}" data-allow="${m.can_see_anon ? '0' : '1'}">${m.can_see_anon ? 'Allowed · Revoke' : 'Allow'}</button></div>`
+      ).join('') : '<p class="sp-note">No council accounts yet.</p>';
+    } catch (e) { list.innerHTML = `<p class="sp-note">${escapeHTML(e.message)}</p>`; }
+  }
+  function renderAccessPanel() {
+    const sec = document.getElementById('sp-access');
+    if (!isAdmin()) { sec.hidden = true; accessLoadedFor = null; return; }
+    sec.hidden = false;
+    if (accessLoadedFor !== session.id) { accessLoadedFor = session.id; refreshAccessList(); }
+  }
+  document.getElementById('access-list').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-user]');
+    if (!b) return;
+    try {
+      await api(`/managers/${encodeURIComponent(b.dataset.user)}/anon-access`, { method: 'PATCH', body: JSON.stringify({ allowed: b.dataset.allow === '1' }) });
+      showToast(b.dataset.allow === '1' ? 'Access granted' : 'Access revoked', 'success');
+      await refreshAccessList();
+    } catch (err) { showToast(err.message, 'error'); }
+  });
+
+  // ---- Side panel (logged-in users): navigation + change password ----
+  const PANEL_PREF = 'voicelink_panel';
+  const wideQuery = window.matchMedia('(min-width: 1100px)');
+  let panelSynced = false;
+  let currentView = 'feed';
+  // Advisers/admins and council members only. Presidents and students never see the link (the server returns 403 too).
+  const canUseArchive = () => !!session && ['admin', 'council'].includes(session.role);
+
+  function setPanel(open) {
+    document.body.classList.toggle('panel-open', open);
+    document.getElementById('sidepanel').inert = !open;
+    const t = document.getElementById('panel-toggle');
+    t.setAttribute('aria-expanded', String(open));
+    t.setAttribute('aria-label', open ? 'Close side menu' : 'Open side menu');
+  }
+  function panelPrefersOpen() {
+    if (!wideQuery.matches) return false; // on phones/tablets it's a drawer, closed by default
+    try { return localStorage.getItem(PANEL_PREF) !== 'closed'; } catch (e) { return true; }
+  }
+  function userTogglePanel(open) {
+    setPanel(open);
+    if (wideQuery.matches) { try { localStorage.setItem(PANEL_PREF, open ? 'open' : 'closed'); } catch (e) {} }
+  }
+
+  // Called from renderAccountBar() whenever the session may have changed.
+  // The panel is available to everyone; what's inside depends on who's logged in.
+  function syncPanel() {
+    const loggedIn = !!session;
+    document.body.classList.toggle('logged-in', loggedIn);
+    if (!panelSynced) { panelSynced = true; setPanel(panelPrefersOpen()); } // default open/closed, once per page load
+    document.getElementById('sp-user').hidden = !loggedIn;
+    document.getElementById('sp-guest').hidden = loggedIn;
+    document.getElementById('sp-password').hidden = !loggedIn;
+    document.getElementById('nav-archive').hidden = !canUseArchive();
+    renderDirectory();
+    renderAccessPanel();
+    if (currentView === 'archive' && !canUseArchive()) setView('feed');
+    if (loggedIn) {
+      const where = session.grade && session.section ? formatGradeSection(session.grade, session.section) : session.role;
+      document.getElementById('sp-user').innerHTML =
+        `<span class="avatar avatar--lg" aria-hidden="true">${escapeHTML(Array.from(session.name || '?')[0].toUpperCase())}</span><span><span class="sp-name">${escapeHTML(session.name)}</span>${escapeHTML(where)}${session.grade && session.role !== 'student' ? ' &middot; ' + escapeHTML(session.role) : ''}</span>`;
+    }
+  }
+
+  function setView(view) {
+    if (view === 'archive' && !canUseArchive()) view = 'feed';
+    currentView = view;
+    document.body.classList.toggle('view-archive', view === 'archive');
+    document.getElementById('nav-feed').classList.toggle('active', view === 'feed');
+    document.getElementById('nav-archive').classList.toggle('active', view === 'archive');
+    if (view === 'archive') loadArchive();
+  }
+
+  // ---- Archive view (advisers/admins and council members only) ----
+  function archiveCardHTML(p) {
+    const id = Number(p.id) || 0;
+    const badge = p.anon
+      ? '<span class="privacy-badge is-anon">Posted Anonymously</span>'
+      : '<span class="privacy-badge is-public">Public</span>';
+    const role = (p.authorRole === 'admin' || p.authorRole === 'council')
+      ? `<span class="grade-tag"><span class="tag-dot"></span>${p.authorRole}</span>` : '';
+    const handle = p.username ? ` <span class="handle">@${escapeHTML(p.username)}</span>` : '';
+    return `
+      <div class="card card--archived">
+        <div class="card-meta">
+          <span class="archive-name">${escapeHTML(p.name)}</span>${handle}${role}${gradeTagHTML(p.grade, p.section)}${badge} ${VL.statusBadge('archived')}
+        </div>
+        <div class="archive-dates">Posted ${formatDate(p.date)} &middot; Archived ${formatDate(p.archivedAt)}</div>
+        <div class="card-text">${escapeHTML(p.text)}</div>
+        <div class="card-actions">
+          <span class="archive-stats"><span>${ICONS.star} ${Number(p.stars) || 0}</span><span>${ICONS.comment} ${Number(p.commentCount) || 0}</span></span>
+          <button class="pin-btn danger" onclick="permanentDelete(${id})">Delete Permanently</button>
+        </div>
+      </div>`;
+  }
+
+  async function loadArchive() {
+    const list = document.getElementById('archive-list');
+    if (!canUseArchive()) { list.innerHTML = '<div class="empty-msg">Access restricted.</div>'; return; }
+    list.innerHTML = '<div class="empty-msg">Loading archive...</div>';
+    try {
+      const data = await api('/posts/archived');
+      list.innerHTML = data.posts.length
+        ? data.posts.map(archiveCardHTML).join('')
+        : VL.emptyState({ icon: 'archive', title: 'The archive is empty', text: 'Posts that get archived from the wall will show up here.' });
+    } catch (e) {
+      list.innerHTML = `<div class="empty-msg">${escapeHTML(e.message)}</div>`;
+    }
+  }
+
+  // Only reachable from the Archive view (admin/council): purges the post, its comments and reactions from the database.
+  window.permanentDelete = async function(id) {
+    if (!canUseArchive()) return;
+    if (!confirm("Permanently delete this post? This can't be undone. Its comments and reactions will be erased too.")) return;
+    try {
+      await api(`/posts/${id}/permanent`, { method: 'DELETE' });
+      showToast('Post permanently deleted', 'success');
+      await loadArchive();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  // ---- Change password ----
+  function pwMessage(kind, msg) {
+    const err = document.getElementById('pw-error'), ok = document.getElementById('pw-ok');
+    err.style.display = kind === 'error' ? 'block' : 'none';
+    ok.style.display = kind === 'ok' ? 'block' : 'none';
+    (kind === 'error' ? err : ok).textContent = msg || '';
+  }
+  async function changePassword() {
+    const cur = document.getElementById('pw-current').value;
+    const next = document.getElementById('pw-new').value;
+    const conf = document.getElementById('pw-confirm').value;
+    const fail = (m) => { Sound.play('error'); pwMessage('error', m); };
+
+    if (!cur || !next || !conf) return fail('Fill in all three fields.');
+    if (next.length < 6) return fail('New password needs to be at least 6 characters.');
+    if (new TextEncoder().encode(next).length > 72) return fail('New password is too long.');
+    if (next !== conf) return fail("New passwords don't match.");
+    if (next === cur) return fail('Choose a password different from your current one.');
+
+    const btn = document.getElementById('pw-save');
+    btn.disabled = true; btn.textContent = 'Updating...';
+    try {
+      await api('/auth/change-password', { method: 'POST', body: JSON.stringify({ current_password: cur, new_password: next }) });
+
+      // The server has signed this account out everywhere (all devices) and cleared our cookie.
+      const wasStaff = isStaff();
+      ['pw-current', 'pw-new', 'pw-confirm'].forEach(id => { document.getElementById(id).value = ''; });
+      pwMessage('', '');
+      session = null;
+      shared = { confessions: [], pinnedId: null };
+      setView('feed');
+      renderAccountBar();
+      renderFormBox();
+      renderAll();
+      if (!wideQuery.matches) setPanel(false);
+      showToast('Password changed. Please log in again.', 'success');
+      openModal(wasStaff ? 'login-modal' : 'userlogin-modal');
+    } catch (e) {
+      pwMessage('error', e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Update password';
+    }
+  }
+
+  document.getElementById('panel-toggle').addEventListener('click', () => userTogglePanel(!document.body.classList.contains('panel-open')));
+  document.getElementById('panel-close').addEventListener('click', () => userTogglePanel(false));
+  document.getElementById('panel-backdrop').addEventListener('click', () => setPanel(false));
+  document.getElementById('nav-feed').addEventListener('click', () => { setView('feed'); if (!wideQuery.matches) setPanel(false); });
+  document.getElementById('nav-archive').addEventListener('click', () => { setView('archive'); if (!wideQuery.matches) setPanel(false); });
+  document.getElementById('pw-save').addEventListener('click', changePassword);
+  ['pw-current', 'pw-new', 'pw-confirm'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') changePassword(); });
+  });
+  document.getElementById('sp-login').addEventListener('click', () => { openModal('userlogin-modal'); if (!wideQuery.matches) setPanel(false); });
+  document.getElementById('sp-signup').addEventListener('click', () => { openModal('signup-modal'); if (!wideQuery.matches) setPanel(false); });
+  document.getElementById('nav-rules').addEventListener('click', () => { openTerms(); if (!wideQuery.matches) setPanel(false); });
+  wideQuery.addEventListener('change', () => setPanel(panelPrefersOpen()));
+
+  init();
+</script>
+
+</body>
+</html>
